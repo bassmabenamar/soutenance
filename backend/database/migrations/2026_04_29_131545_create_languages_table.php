@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-      Schema::create('q_c_m_s', function (Blueprint $table) {
+        Schema::create('languages', function (Blueprint $table) {
     $table->id();
-    $table->string('title');
-    $table->string('category');
-    $table->string('status')->default('draft');
+    $table->string('title'); // HTML, CSS, JS
+    $table->string('icon_name')->nullable();
+    $table->string('color')->nullable();
     $table->timestamps();
 });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('q_c_m_s');
+        Schema::dropIfExists('languages');
     }
 };

@@ -11,7 +11,8 @@ class QCMSeeder extends Seeder
     {
         $qcm = QCM::create([
             'title' => 'HTML Basics',
-            'category' => 'HTML'
+            'category' => 'HTML',
+            'status' => 'published'
         ]);
 
         $qcm->questions()->createMany([

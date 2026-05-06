@@ -2,66 +2,96 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\QCMController;
-use App\Http\Controllers\CourseController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TPController;
-use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
-| PUBLIC ROUTES
+| PUBLIC
 |--------------------------------------------------------------------------
 */
-
 Route::post('/login', [AuthController::class, 'login']);
 
 /*
 |--------------------------------------------------------------------------
-| PROTECTED ROUTES (USER)
+| AUTH
 |--------------------------------------------------------------------------
 */
-
 Route::middleware('auth:sanctum')->group(function () {
 
-    // 👤 Auth
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
-    // 📚 Courses
+    /*
+    |--------------------------------------------------------------------------
+    | 🎓 STUDENT
+    |--------------------------------------------------------------------------
+    */
+
+    // ✅ ALL COURSES (for CoursesPage = languages list)
     Route::get('/courses', [CourseController::class, 'index']);
 
-    // 📘 Books (PDF)
+    // ✅ FILTER BY CATEGORY (VERY IMPORTANT 🔥)
+    Route::get('/courses/category/{category}', [CourseController::class, 'byCategory']);
+
+    // ✅ COURSE DETAIL (PDF page)
+    Route::get('/courses/{id}', [CourseController::class, 'show']);
+
+    // BOOKS
     Route::get('/books', [BookController::class, 'index']);
 
-    // 🧪 QCM
+    // QCM
     Route::get('/qcm', [QCMController::class, 'index']);
     Route::post('/qcm/submit', [QCMController::class, 'submit']);
     Route::get('/qcm/results', [QCMController::class, 'results']);
 
-    // 💻 TP
+    // TP
     Route::get('/tp', [TPController::class, 'index']);
-});
 
-/*
-|--------------------------------------------------------------------------
-| ADMIN ROUTES
-|--------------------------------------------------------------------------
-*/
+    // Dashboard
+    Route::get('/student/dashboard', [StudentController::class, 'dashboard']);
+    Route::get('/languages', [CourseController::class, 'languages']);
+    Route::get('/student/qcm/languages', [QCMController::class, 'languages']);
+    Route::get('/student/qcm/{category}', [QCMController::class, 'getByCategory']);
+    Route::get('/student/certifications', [StudentController::class, 'certifications']);
+    Route::get('/student/profile', [StudentController::class, 'profile']);
+    /*
+    |--------------------------------------------------------------------------
+    | 🛠️ ADMIN
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('admin')->group(function () {
 
-Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+        Route::get('/admin/dashboard', [AdminController::class, 'dashboard']);
+        Route::get('/admin/stats', [AdminController::class, 'stats']);
+        Route::get('/admin/courses', [AdminController::class, 'courses']);
+        Route::get('/admin/activities', [AdminController::class, 'activities']);
 
-    // 📊 Admin dashboard
-    Route::get('/admin/stats', [AdminController::class, 'stats']);
+        // COURSES
+        Route::post('/admin/courses/upload', [CourseController::class, 'upload']);
+        Route::delete('/admin/courses/{id}', [CourseController::class, 'destroy']);
 
-    // 📚 Manage books
-    Route::post('/books', [BookController::class, 'store']);
-    Route::delete('/books/{id}', [BookController::class, 'destroy']);
+        // QCM
+        Route::get('/admin/qcm', [QCMController::class, 'index']);
+        Route::post('/admin/qcm/store', [QCMController::class, 'store']);
+        Route::delete('/admin/qcm/{id}', [QCMController::class, 'destroy']);
 
-    // 🧪 Manage QCM
-    Route::post('/qcm', [QCMController::class, 'store']);
+        // USERS
+Route::get('/admin/users', [AdminController::class, 'users']);
+Route::patch('/admin/users/{id}/status', [AdminController::class, 'toggleUserStatus']);
 
-    // 💻 Manage TP
-    Route::post('/tp', [TPController::class, 'store']);
-    Route::delete('/tp/{id}', [TPController::class, 'destroy']);
+
+// --- CERTIFICATES ---
+Route::get('/admin/certificates/stats', [AdminController::class, 'certificateStats']);
+Route::get('/admin/certificates/eligibility', [AdminController::class, 'certificateEligibility']);
+Route::get('/admin/certificates/generate/{userId}', [AdminController::class, 'generateCertificate']);    });
+// Example: get rules
+Route::get('/admin/certificates/rules', [AdminController::class, 'getCertificateRules']);
+
+// Example: update rules
+Route::post('/admin/certificates/rules/update', [AdminController::class, 'updateCertificateRules']);
 });

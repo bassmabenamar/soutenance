@@ -15,7 +15,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('access_code')->unique();
             $table->string('role')->default('student');
-
+            $table->string('status')->default('Actif'); // Actif or Bloqué
+            $table->integer('progress')->default(0);    // Progress percentage
             $table->rememberToken();
             $table->timestamps();
         });

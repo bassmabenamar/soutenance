@@ -15,7 +15,9 @@ return new class extends Migration
     $table->id();
     $table->string('title');
     $table->string('file');
-    $table->string('category');
+    $table->foreignId('language_id')
+      ->constrained()
+      ->onDelete('cascade');
     $table->timestamps();
 });
     }

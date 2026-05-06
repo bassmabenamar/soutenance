@@ -10,12 +10,12 @@ class QCM extends Model
 
     protected $fillable = [
         'title',
-        'category'
+        'category','status'
     ];
 
     public function questions()
     {
-        return $this->hasMany(Question::class);
+        return $this->hasMany(Question::class ,'q_c_m_id');
     }
 
     public function results()

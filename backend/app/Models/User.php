@@ -12,8 +12,12 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'access_code',
-        'role'
+        'role',
+        'status',
+        'progress'
     ];
+
+    protected $hidden = [];
 
     // 📱 devices (max 3 login devices)
     public function devices()
