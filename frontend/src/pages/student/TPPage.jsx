@@ -3,28 +3,20 @@ import {
   LayoutDashboard, BookOpen, HelpCircle, Terminal, 
   Code, User, Code2, Cpu, Database, ChevronRight, Layers
 } from 'lucide-react';
+import Sidebar from "../../components/layout/SidebarStudent";
 
 const TPPage = () => {
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans text-slate-700">
       
       {/* --- Sidebar (Branding: CodeBook Academy) --- */}
-      <aside className="w-64 bg-white border-r border-gray-100 flex flex-col py-8 px-4 shrink-0">
-        <div className="px-4 mb-10">
-          <h1 className="text-[#F97316] text-2xl font-black leading-tight">
-            CodeBook<br />Academy
-          </h1>
-        </div>
-        <nav className="flex-1 space-y-1">
-          <SidebarItem icon={<LayoutDashboard size={20} />} label="Tableau de bord" />
-          <SidebarItem icon={<BookOpen size={20} />} label="Cours" />
-          <SidebarItem icon={<HelpCircle size={20} />} label="Quiz (QCM)" />
-          <SidebarItem icon={<Terminal size={20} />} label="Travaux Pratiques" active />
-          <SidebarItem icon={<Code size={20} />} label="CodeLab" />
-          <SidebarItem icon={<User size={20} />} label="Profil" />
-        </nav>
-      </aside>
-
+      <Sidebar 
+  brandName="CodeLink"
+  onLogout={() => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  }}
+/>
       {/* --- Main Content Area --- */}
       <main className="flex-1 p-12">
         

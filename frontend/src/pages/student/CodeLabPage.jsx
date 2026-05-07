@@ -1,138 +1,171 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, BookOpen, HelpCircle, Terminal, 
-  Code, User, RotateCcw, Play, Save, ChevronRight, 
-  FileJson, FileCode, Hash, Globe
+  RotateCcw, Play, Save, Globe, Loader2, 
+  FileCode, Hash, Braces 
 } from 'lucide-react';
+import Editor from 'react-simple-code-editor';
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-markup'; // HTML
+import 'prismjs/components/prism-css';
+import 'prismjs/themes/prism-tomorrow.css'; // Theme sombre pour l'éditeur
+
+import Sidebar from "../../components/layout/SidebarStudent";
 
 const CodeLabPage = () => {
+  // --- ÉTAT DU CODE ---
+  const [files, setFiles] = useState({
+    'index.html': '<h1>Bienvenue sur CodeLink !</h1>\n<p>Modifiez le code pour voir le rendu.</p>',
+    'style.css': 'body { \n  font-family: sans-serif; \n  display: flex; \n  flex-direction: column;\n  align-items: center; \n  justify-content: center;\n  height: 100vh;\n  background: #f8fafc; \n}\n\nh1 { color: #F97316; font-size: 3rem; }',
+    'script.js': '// Votre JavaScript ici\nconsole.log("Hello CodeLink!");'
+  });
+
   const [activeTab, setActiveTab] = useState('index.html');
+  const [srcDoc, setSrcDoc] = useState('');
+  const [isRunning, setIsRunning] = useState(false);
+
+  // --- LOGIQUE DE COMPILATION ---
+  // Combine HTML, CSS et JS dans un seul document pour l'iframe
+  const updateOutput = () => {
+    setIsRunning(true);
+    const combined = `
+      <html>
+        <head>
+          <style>${files['style.css']}</style>
+        </head>
+        <body>
+          ${files['index.html']}
+          <script>${files['script.js']}</script>
+        </body>
+      </html>
+    `;
+    
+    // Un petit délai pour simuler une compilation et donner un feedback visuel
+    setTimeout(() => {
+      setSrcDoc(combined);
+      setIsRunning(false);
+    }, 500);
+  };
+
+  // Mettre à jour au démarrage
+  useEffect(() => {
+    updateOutput();
+  }, []);
+
+  const handleCodeChange = (newCode) => {
+    setFiles(prev => ({ ...prev, [activeTab]: newCode }));
+  };
+
+  const getLanguage = (tab) => {
+    if (tab.endsWith('.html')) return languages.markup;
+    if (tab.endsWith('.css')) return languages.css;
+    return languages.javascript;
+  };
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] font-sans text-slate-700 overflow-hidden">
-      
-      {/* --- Sidebar (CodeBook Academy Branding) --- */}
-      <aside className="w-64 bg-white border-r border-gray-100 flex flex-col py-8 px-4 shrink-0">
-        <div className="px-4 mb-10">
-          <h1 className="text-[#F97316] text-2xl font-black leading-tight">
-            CodeBook<br />Academy
-          </h1>
-        </div>
-        <nav className="flex-1 space-y-1">
-          <SidebarItem icon={<LayoutDashboard size={20} />} label="Tableau de bord" />
-          <SidebarItem icon={<BookOpen size={20} />} label="Cours" />
-          <SidebarItem icon={<HelpCircle size={20} />} label="Quiz (QCM)" />
-          <SidebarItem icon={<Terminal size={20} />} label="Travaux Pratiques" />
-          <SidebarItem icon={<Code size={20} />} label="CodeLab" active />
-          <SidebarItem icon={<User size={20} />} label="Profil" />
-        </nav>
-        
-        {/* User Profile Card at Bottom */}
-        <div className="mt-auto p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-[#F97316] flex items-center justify-center text-white font-bold text-sm shadow-sm">
-            UD
-          </div>
-          <div className="overflow-hidden">
-            <p className="text-xs font-bold text-slate-800 truncate">Jean Dupont</p>
-            <p className="text-[10px] text-slate-400 font-medium">Apprenti Développeur</p>
-          </div>
-        </div>
-      </aside>
+    <div className="flex h-screen bg-[#f8fafc] font-sans text-slate-700 overflow-hidden">
+      <Sidebar brandName="CodeLink" onLogout={() => {}} />
 
-      {/* --- Main IDE Area --- */}
-      <main className="flex-1 flex flex-col h-screen">
+      <main className="flex-1 flex flex-col overflow-hidden">
         
-        {/* IDE Top Bar: Tabs and Actions */}
-        <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-6 shrink-0">
+        {/* --- TOPBAR --- */}
+        <header className="h-14 bg-white border-b border-gray-100 flex items-center justify-between px-6 shrink-0 z-20">
           <div className="flex items-center gap-2">
             <EditorTab 
-              name="Projet_Alpha.html" 
+              name="index.html" 
+              icon={<FileCode size={14} />}
               active={activeTab === 'index.html'} 
               onClick={() => setActiveTab('index.html')} 
             />
             <EditorTab 
               name="style.css" 
+              icon={<Hash size={14} />}
               active={activeTab === 'style.css'} 
               onClick={() => setActiveTab('style.css')} 
             />
             <EditorTab 
               name="script.js" 
+              icon={<Braces size={14} />}
               active={activeTab === 'script.js'} 
               onClick={() => setActiveTab('script.js')} 
             />
-            <div className="flex items-center gap-1.5 ml-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-               <Save size={12} /> Sauvegardé
-            </div>
           </div>
           
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 text-slate-500 font-bold text-sm hover:bg-slate-50 rounded-lg transition-colors border border-transparent hover:border-slate-200">
-              <RotateCcw size={16} /> Réinitialiser
+            <button 
+              onClick={() => setFiles({ 'index.html': '', 'style.css': '', 'script.js': '' })}
+              className="flex items-center gap-2 px-4 py-2 text-slate-400 font-bold text-xs hover:text-red-500 transition-colors"
+            >
+              <RotateCcw size={14} /> Reset
             </button>
-            <button className="flex items-center gap-2 bg-[#F97316] text-white px-6 py-2 rounded-lg font-bold text-sm shadow-lg shadow-orange-100 hover:bg-orange-600 transition-all">
-              <Play size={16} fill="currentColor" /> Exécuter
+            <button 
+              onClick={updateOutput}
+              disabled={isRunning}
+              className="flex items-center gap-2 bg-[#F97316] text-white px-6 py-2 rounded-xl font-black text-xs shadow-lg shadow-orange-200 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {isRunning ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} fill="currentColor" />} 
+              EXÉCUTER
             </button>
           </div>
         </header>
 
-        {/* Split Editor and Preview Area */}
-        <div className="flex-1 flex overflow-hidden">
+        {/* --- ZONE IDE --- */}
+        <div className="flex-1 flex overflow-hidden bg-[#111827]">
           
-          {/* 1. Code Editor (Dark Mode) */}
-          <div className="flex-1 bg-[#111827] flex flex-col border-r border-slate-800">
-            <div className="h-8 bg-[#1f2937] flex items-center px-4 justify-between">
-               <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Éditeur de code</span>
+          {/* ÉDITEUR (Gaucher) */}
+          <div className="flex-1 flex flex-col border-r border-slate-800 relative">
+            <div className="h-8 bg-[#1f2937]/50 flex items-center px-4 justify-between border-b border-white/5">
+               <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Source: {activeTab}</span>
                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/50"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/50"></div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/50"></div>
+                  <div className="w-2 h-2 rounded-full bg-red-500/30"></div>
+                  <div className="w-2 h-2 rounded-full bg-yellow-500/30"></div>
+                  <div className="w-2 h-2 rounded-full bg-green-500/30"></div>
                </div>
             </div>
             
-            <div className="flex-1 p-6 font-mono text-sm leading-relaxed overflow-y-auto">
-              <CodeLine number={1} content="<!DOCTYPE html>" color="text-slate-500" />
-              <CodeLine number={2} content="<html>" color="text-blue-400" />
-              <CodeLine number={3} content="<head>" color="text-blue-400" indent={1} />
-              <CodeLine number={4} content="<style>" color="text-blue-400" indent={2} />
-              <CodeLine number={5} content="body { background: #f8fafc }" color="text-slate-300" indent={3} />
-              <CodeLine number={6} content="h1 { color: #ff6b6b }" color="text-slate-300" indent={3} />
-              <CodeLine number={7} content="</style>" color="text-blue-400" indent={2} />
-              <CodeLine number={8} content="</head>" color="text-blue-400" indent={1} />
-              <CodeLine number={9} content="<body>" color="text-blue-400" indent={1} />
-              <CodeLine number={10} content="<h1>Bienvenue sur CodeLab !</h1>" color="text-white" indent={2} />
-              <CodeLine number={11} content="<p>Commencez à coder ici...</p>" color="text-slate-400" indent={2} />
-              <CodeLine number={12} content="</body>" color="text-blue-400" indent={1} />
-              <CodeLine number={13} content="</html>" color="text-blue-400" />
-              <div className="ml-4 mt-2 w-2 h-5 bg-orange-500/50 animate-pulse"></div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+              <Editor
+                value={files[activeTab]}
+                onValueChange={handleCodeChange}
+                highlight={code => highlight(code, getLanguage(activeTab))}
+                padding={20}
+                style={{
+                  fontFamily: '"Fira Code", monospace',
+                  fontSize: 14,
+                  minHeight: '100%',
+                  backgroundColor: 'transparent',
+                  color: '#e2e8f0'
+                }}
+                className="focus:outline-none"
+              />
             </div>
           </div>
 
-          {/* 2. Live Preview Area */}
-          <div className="flex-1 bg-slate-100 p-8 flex flex-col">
-            <div className="flex items-center gap-2 mb-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-               <Globe size={14} /> Prévisualisation en direct
+          {/* PRÉVISUALISATION (Droite) */}
+          <div className="flex-1 bg-slate-100 flex flex-col relative">
+            <div className="h-8 bg-white border-b border-gray-200 flex items-center px-6">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Globe size={10} /> Live Preview Output
+                </span>
             </div>
             
-            <div className="flex-1 bg-white rounded-3xl shadow-2xl shadow-slate-300/50 border border-white flex flex-col items-center justify-center text-center p-12">
-              <h1 className="text-[#F97316] text-4xl font-black mb-6">
-                Bienvenue sur CodeLab !
-              </h1>
-              <p className="text-slate-500 max-w-sm mb-10 leading-relaxed font-medium">
-                Ceci est le rendu en temps réel de votre code. Modifiez l'éditeur à gauche pour voir les changements s'appliquer instantanément.
-              </p>
-              
-              {/* Preview Graphics */}
-              <div className="relative">
-                <div className="w-32 h-32 rounded-full border-4 border-orange-50 overflow-hidden shadow-xl">
-                   <img 
-                    src="https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&q=80&w=300" 
-                    alt="Code preview" 
-                    className="w-full h-full object-cover"
-                   />
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white border-4 border-white">
-                  <Play size={12} fill="currentColor" />
-                </div>
+            <div className="flex-1 p-6 flex flex-col h-full">
+              <div className="flex-1 bg-white rounded-[32px] shadow-2xl shadow-slate-300/50 border border-white overflow-hidden relative">
+                {isRunning && (
+                  <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex items-center justify-center">
+                    <Loader2 className="text-[#F97316] animate-spin" size={32} />
+                  </div>
+                )}
+                <iframe
+                  srcDoc={srcDoc}
+                  title="output"
+                  sandbox="allow-scripts"
+                  frameBorder="0"
+                  width="100%"
+                  height="100%"
+                  className="bg-white"
+                />
               </div>
             </div>
           </div>
@@ -143,42 +176,20 @@ const CodeLabPage = () => {
   );
 };
 
-/* --- Helper Components --- */
+/* --- COMPOSANTS INTERNES --- */
 
-const SidebarItem = ({ icon, label, active = false }) => (
-  <div className="relative group">
-    {active && (
-      <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-1 h-8 bg-[#F97316] rounded-r-full shadow-[0_0_8px_#F97316]" />
-    )}
-    <div className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all ${
-      active ? 'bg-orange-50 text-[#F97316] font-bold shadow-sm' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
-    }`}>
-      <span className={active ? 'text-[#F97316]' : 'text-slate-400'}>{icon}</span>
-      <span className="text-sm">{label}</span>
-    </div>
-  </div>
-);
-
-const EditorTab = ({ name, active, onClick }) => (
-  <div 
+const EditorTab = ({ name, icon, active, onClick }) => (
+  <button 
     onClick={onClick}
-    className={`px-4 py-2 rounded-lg cursor-pointer transition-all text-xs font-bold border ${
+    className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-xs font-black border ${
       active 
-        ? 'bg-white border-slate-200 text-[#F97316] shadow-sm' 
-        : 'border-transparent text-slate-400 hover:text-slate-600'
+        ? 'bg-orange-50 border-orange-100 text-[#F97316] shadow-sm' 
+        : 'border-transparent text-slate-400 hover:text-slate-600 hover:bg-slate-50'
     }`}
   >
+    <span className={active ? 'text-orange-500' : 'text-slate-300'}>{icon}</span>
     {name}
-  </div>
-);
-
-const CodeLine = ({ number, content, color, indent = 0 }) => (
-  <div className="flex gap-6 mb-1">
-    <span className="w-6 text-slate-700 text-right select-none">{number}</span>
-    <span className={`${color} ${indent ? `ml-${indent * 4}` : ''} whitespace-pre`}>
-      {content}
-    </span>
-  </div>
+  </button>
 );
 
 export default CodeLabPage;

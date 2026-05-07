@@ -1,167 +1,226 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
-  FileText, 
-  HelpCircle, 
-  Terminal, 
-  Users, 
-  Menu, 
-  Plus, 
-  Trash2, 
-  ChevronRight, 
-  ChevronLeft,
-  Circle
+  Plus, Trash2, ChevronRight, ChevronLeft, Loader2, Menu, Save, CheckCircle2, HelpCircle 
 } from 'lucide-react';
+import API from '../../../services/api'; 
+import SidebarAdmin from '../../../components/layout/SidebarAdmin';
 
+// ... reste du code
 const AddQCM = () => {
-  const [selectedAnswer, setSelectedAnswer] = useState(1);
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  // Global settings
+  const [quizInfo, setQuizInfo] = useState({
+    title: '',
+    category: 'Développement Web'
+  });
+
+  // Dynamic question list
+  const [questions, setQuestions] = useState([
+    {
+      question_text: '',
+      options: ['', '', '', ''],
+      correct_answer_index: 0
+    }
+  ]);
+
+  // --- LOGIC ---
+  const addQuestion = () => {
+    setQuestions([...questions, {
+      question_text: '',
+      options: ['', '', '', ''],
+      correct_answer_index: 0
+    }]);
+  };
+
+  const removeQuestion = (index) => {
+    if (questions.length > 1) {
+      setQuestions(questions.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleQuestionChange = (index, text) => {
+    const newQuestions = [...questions];
+    newQuestions[index].question_text = text;
+    setQuestions(newQuestions);
+  };
+
+  const handleOptionChange = (qIndex, oIndex, text) => {
+    const newQuestions = [...questions];
+    newQuestions[qIndex].options[oIndex] = text;
+    setQuestions(newQuestions);
+  };
+
+  const handleSelectCorrect = (qIndex, oIndex) => {
+    const newQuestions = [...questions];
+    newQuestions[qIndex].correct_answer_index = oIndex;
+    setQuestions(newQuestions);
+  };
+
+  const handleSubmit = async () => {
+    if (!quizInfo.title) return alert("Veuillez donner un titre au Quiz.");
+    
+    setLoading(true);
+    try {
+      const dataToSend = { ...quizInfo, questions };
+      const response = await API.post('/admin/qcm/store', dataToSend);
+
+      if (response.status === 200 || response.status === 201) {
+        alert("QCM publié avec succès !");
+        navigate('/admin/qcm');
+      }
+    } catch (error) {
+      alert(error.response?.data?.message || "Erreur lors de l'enregistrement");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc] font-sans text-slate-700">
-      
-      {/* --- Sidebar (Same as PDF Page) --- */}
-      <aside className="w-60 bg-white border-r border-blue-100 flex flex-col shrink-0">
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-orange-600 tracking-tight">EduSaaS</h1>
-        </div>
-        <nav className="flex-1 px-3 space-y-1 mt-4">
-          <SidebarItem icon={<LayoutDashboard size={18}/>} label="Tableau de bord" />
-          <SidebarItem icon={<FileText size={18}/>} label="Gestion des PDF" />
-          <SidebarItem icon={<HelpCircle size={18}/>} label="Gestion des QCM" active />
-          <SidebarItem icon={<Terminal size={18}/>} label="Gestion des TP" />
-          <SidebarItem icon={<Users size={18}/>} label="Utilisateurs" />
-        </nav>
-      </aside>
+    <div className="flex min-h-screen bg-[#f8fafc]">
+      <SidebarAdmin />
 
-      {/* --- Main Content --- */}
-      <main className="flex-1 flex flex-col">
+      {/* Main Content Area: Added ml-72 to respect sidebar and px-12 for breathing room */}
+      <main className="flex-1 ml-72 px-12 py-10 transition-all">
         
-        {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-8">
-          <div className="flex items-center gap-4">
-            <Menu className="text-gray-400 cursor-pointer" />
-            <span className="font-semibold text-gray-700">Plateforme Admin</span>
-          </div>
-          <div className="flex items-center gap-3">
-             <h1 className="text-xl font-bold text-orange-600 mr-4">EduSaaS</h1>
-            <div className="w-8 h-8 rounded-full bg-slate-200 border border-gray-300 overflow-hidden">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" />
-            </div>
-          </div>
-        </header>
-
-        {/* Content Area */}
-        <div className="py-8 px-8 w-full">
-          
-          {/* Back Link & Title */}
-          <button className="flex items-center gap-1 text-orange-600 text-sm font-bold mb-4 hover:underline">
-            <ChevronLeft size={16} /> Retour aux QCM
-          </button>
-          
-          <h2 className="text-2xl font-bold text-slate-800">Création d'un Nouveau QCM</h2>
-          <p className="text-gray-500 mb-10">Définissez la structure et les questions de votre évaluation interactive.</p>
-
-          {/* --- Stepper --- */}
-          <div className="flex items-center justify-center max-w-4xl mx-auto mb-12">
-            <Step number="1" label="Paramètres" active />
-            <div className="h-px bg-blue-100 w-32 mx-4" />
-            <Step number="2" label="Questions" disabled />
-            <div className="h-px bg-blue-100 w-32 mx-4" />
-            <Step number="3" label="Publication" disabled />
+        {/* Breadcrumbs & Navigation */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <button 
+              onClick={() => navigate("/admin/qcm")} 
+              className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-orange-500 transition-colors mb-2"
+            >
+              <ChevronLeft size={14} strokeWidth={3} /> Retour aux QCM
+            </button>
+            <h2 className="text-3xl font-[1000] text-slate-900 tracking-tighter">Création de QCM</h2>
           </div>
 
-          {/* --- Details Card --- */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 mb-8">
-            <h3 className="font-bold text-slate-800 mb-6">Détails du Quiz</h3>
-            <div className="grid grid-cols-2 gap-8">
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Titre du Quiz</label>
-                <input 
-                  type="text" 
-                  placeholder="ex: Introduction au JavaScript Moderne"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:ring-2 focus:ring-orange-500 focus:outline-none placeholder:text-gray-400"
-                />
+          <div className="flex gap-4">
+            <button 
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex items-center gap-3 bg-orange-600 text-white px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-orange-200 hover:bg-orange-700 hover:-translate-y-1 transition-all disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+              {loading ? "Publication..." : "Publier le QCM"}
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-12 gap-8">
+          {/* Left Column: Quiz Info & Questions */}
+          <div className="col-span-12 lg:col-span-8 space-y-8">
+            
+            {/* Quiz Info Card */}
+            <div className="bg-white rounded-[32px] p-10 border border-slate-100 shadow-sm">
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">Paramètres du Quiz</h3>
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Titre</label>
+                  <input 
+                    type="text" 
+                    value={quizInfo.title}
+                    onChange={(e) => setQuizInfo({...quizInfo, title: e.target.value})}
+                    placeholder="ex: Algorithmique Avancée"
+                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none font-bold text-slate-700 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Catégorie</label>
+                  <select 
+                    value={quizInfo.category}
+                    onChange={(e) => setQuizInfo({...quizInfo, category: e.target.value})}
+                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 outline-none font-bold text-slate-700 cursor-pointer focus:bg-white transition-all appearance-none"
+                  >
+                    <option>Développement Web</option>
+                    <option>Cloud Computing</option>
+                    <option>Data Science</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-2">Catégorie</label>
-                <select className="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50 focus:ring-2 focus:ring-orange-500 focus:outline-none">
-                  <option>Développement Web</option>
-                </select>
+            </div>
+
+            {/* Questions List */}
+            <div className="space-y-6">
+              <div className="flex justify-between items-end px-2">
+                <h3 className="text-lg font-[1000] text-slate-900 tracking-tight">Questions ({questions.length})</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cochez le cercle pour définir la bonne réponse</p>
               </div>
+
+              {questions.map((q, qIndex) => (
+                <div key={qIndex} className="group bg-white rounded-[32px] border border-slate-100 shadow-sm hover:border-orange-200 transition-all p-8 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-orange-500" />
+                  
+                  <button 
+                    onClick={() => removeQuestion(qIndex)}
+                    className="absolute top-8 right-8 text-slate-300 hover:text-red-500 transition-colors p-2"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+
+                  <div className="flex items-center gap-4 mb-6">
+                    <span className="w-10 h-10 flex items-center justify-center bg-slate-50 rounded-xl font-black text-orange-600 border border-slate-100">
+                      {qIndex + 1}
+                    </span>
+                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Énoncé de la question</label>
+                  </div>
+
+                  <textarea 
+                    rows="2"
+                    value={q.question_text}
+                    onChange={(e) => handleQuestionChange(qIndex, e.target.value)}
+                    placeholder="Entrez votre question ici..."
+                    className="w-full px-6 py-4 rounded-2xl bg-slate-50 border border-slate-100 focus:bg-white focus:ring-4 focus:ring-orange-500/10 outline-none font-bold text-slate-700 transition-all mb-8"
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {q.options.map((opt, oIndex) => (
+                      <AnswerOption 
+                        key={oIndex}
+                        text={opt} 
+                        isSelected={q.correct_answer_index === oIndex} 
+                        onClick={() => handleSelectCorrect(qIndex, oIndex)} 
+                        onChange={(val) => handleOptionChange(qIndex, oIndex, val)}
+                        placeholder={`Option ${oIndex + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              <button 
+                onClick={addQuestion} 
+                className="w-full border-2 border-dashed border-slate-200 rounded-[32px] py-12 flex flex-col items-center justify-center bg-slate-50/50 hover:bg-white hover:border-orange-300 transition-all group"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-orange-500 transition-all mb-4">
+                  <Plus size={24} />
+                </div>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600">Ajouter une nouvelle question</p>
+              </button>
             </div>
           </div>
 
-          {/* --- Questions Header --- */}
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-slate-800 text-lg">Questions</h3>
-            <button className="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-orange-100 transition-colors">
-              <Plus size={18} /> Ajouter une question
-            </button>
-          </div>
-
-          {/* --- Question Item --- */}
-          <div className="bg-white rounded-2xl shadow-sm border-l-4 border-l-orange-600 border border-gray-100 p-8 mb-6 relative">
-            <button className="absolute top-8 right-8 text-slate-300 hover:text-red-500">
-              <Trash2 size={20} />
-            </button>
-
-            <div className="flex items-center gap-4 mb-6">
-              <span className="w-8 h-8 flex items-center justify-center bg-gray-50 rounded-lg font-bold text-slate-700 border border-gray-100">1</span>
-              <h4 className="font-bold text-slate-800">Question Principale</h4>
+          {/* Right Column: Tips/Stats */}
+          <div className="col-span-12 lg:col-span-4 space-y-6">
+            <div className="bg-slate-900 rounded-[32px] p-8 text-white shadow-2xl shadow-slate-200">
+              <div className="p-3 bg-slate-800 rounded-2xl w-fit mb-6 text-orange-400">
+                <HelpCircle size={24} />
+              </div>
+              <h4 className="text-lg font-black mb-2">Conseils d'expert</h4>
+              <p className="text-slate-400 text-sm leading-relaxed mb-6">
+                Un bon QCM comporte généralement 4 options équilibrées. Assurez-vous que l'énoncé est clair et sans ambiguïté.
+              </p>
+              <ul className="space-y-4">
+                <li className="flex items-center gap-3 text-xs font-bold text-slate-300">
+                  <CheckCircle2 size={16} className="text-orange-500" /> Mélangez les réponses
+                </li>
+                <li className="flex items-center gap-3 text-xs font-bold text-slate-300">
+                  <CheckCircle2 size={16} className="text-orange-500" /> Évitez les "Toutes les réponses"
+                </li>
+              </ul>
             </div>
-
-            <div className="mb-8">
-              <label className="block text-sm font-bold text-slate-500 mb-3">Énoncé de la question</label>
-              <textarea 
-                rows="2"
-                placeholder="Quelle est la valeur de 'this' dans une fonction fléchée ?"
-                className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50/30 focus:ring-2 focus:ring-orange-500 focus:outline-none"
-              ></textarea>
-            </div>
-
-            {/* Answer Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <AnswerOption 
-                text="Le contexte global" 
-                isSelected={selectedAnswer === 0} 
-                onClick={() => setSelectedAnswer(0)} 
-              />
-              <AnswerOption 
-                text="Le contexte parent lexique" 
-                isSelected={selectedAnswer === 1} 
-                onClick={() => setSelectedAnswer(1)} 
-              />
-              <AnswerOption 
-                text="La fonction elle-même" 
-                isSelected={selectedAnswer === 2} 
-                onClick={() => setSelectedAnswer(2)} 
-              />
-              <AnswerOption 
-                text="Undefined" 
-                isSelected={selectedAnswer === 3} 
-                onClick={() => setSelectedAnswer(3)} 
-              />
-            </div>
-          </div>
-
-          {/* --- Add New Question Dotted Zone --- */}
-          <div className="border-2 border-dashed border-blue-100 rounded-2xl py-10 flex flex-col items-center justify-center bg-white/50 mb-10">
-            <div className="w-10 h-10 rounded-full border-2 border-blue-200 flex items-center justify-center text-blue-300 mb-3">
-              <Plus size={24} />
-            </div>
-            <p className="text-slate-400 font-bold text-sm">Ajouter une nouvelle question</p>
-            <p className="text-slate-300 text-xs mt-1">Configurez les réponses et désignez la bonne solution.</p>
-          </div>
-
-          {/* --- Footer Actions --- */}
-          <div className="flex justify-end items-center gap-4 border-t border-gray-100 pt-8">
-            <button className="px-8 py-3 rounded-xl bg-blue-50/50 text-slate-500 font-bold hover:bg-blue-50 transition-colors">
-              Enregistrer en brouillon
-            </button>
-            <button className="flex items-center gap-2 bg-[#92400e] text-white px-10 py-3 rounded-xl font-bold shadow-lg shadow-orange-100 hover:brightness-110 transition-all">
-              Suivant: Publication
-              <ChevronRight size={18} />
-            </button>
           </div>
         </div>
       </main>
@@ -169,43 +228,29 @@ const AddQCM = () => {
   );
 };
 
-/* --- Helper Components --- */
-
-const SidebarItem = ({ icon, label, active = false }) => (
-  <div className={`flex items-center gap-3 px-4 py-3.5 rounded-xl cursor-pointer transition-all ${
-    active ? 'bg-orange-50 text-orange-600 font-bold shadow-sm' : 'text-gray-400 hover:bg-gray-50'
-  }`}>
-    {icon}
-    <span className="text-sm">{label}</span>
-  </div>
-);
-
-const Step = ({ number, label, active = false, disabled = false }) => (
-  <div className={`flex items-center gap-3 ${disabled ? 'opacity-40' : 'opacity-100'}`}>
-    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-sm ${
-      active ? 'border-orange-600 text-orange-600' : 'border-blue-200 text-blue-300'
-    }`}>
-      {number}
-    </div>
-    <span className={`font-bold text-sm ${active ? 'text-orange-600' : 'text-blue-300'}`}>{label}</span>
-  </div>
-);
-
-const AnswerOption = ({ text, isSelected, onClick }) => (
+const AnswerOption = ({ text, isSelected, onClick, onChange, placeholder }) => (
   <div 
-    onClick={onClick}
-    className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${
+    className={`flex items-center gap-4 p-4 rounded-[20px] border transition-all ${
       isSelected 
-        ? 'border-orange-200 bg-orange-50/30 ring-1 ring-orange-200' 
-        : 'border-gray-100 bg-white hover:border-blue-100'
+        ? 'border-orange-500 bg-orange-50/50 shadow-sm' 
+        : 'border-slate-100 bg-white hover:border-slate-300 shadow-sm'
     }`}
   >
-    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-      isSelected ? 'border-orange-600' : 'border-gray-200'
-    }`}>
-      {isSelected && <div className="w-2.5 h-2.5 bg-orange-600 rounded-full" />}
+    <div 
+      onClick={onClick}
+      className={`w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all ${
+        isSelected ? 'border-orange-500 bg-orange-500' : 'border-slate-200'
+      }`}
+    >
+      {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
     </div>
-    <span className={`text-sm font-medium ${isSelected ? 'text-slate-800' : 'text-slate-500'}`}>{text}</span>
+    <input 
+      type="text"
+      value={text}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="bg-transparent border-none outline-none text-sm font-bold text-slate-700 w-full placeholder:text-slate-300"
+    />
   </div>
 );
 

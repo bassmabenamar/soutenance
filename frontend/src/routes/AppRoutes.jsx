@@ -7,17 +7,20 @@ import NotebookPage from "../pages/public/NotebookPage";
 
 /* AUTH */
 import LoginPage from "../pages/auth/StudentLoginPage";
-import AdminLogin from "../pages/auth/AdminLogin";
+
 
 /* STUDENT */
 import DashboardPage from "../pages/student/DashboardPage";
 import CoursesPage from "../pages/student/CoursesPage";
-import CourseDetail from "../pages/student/CourseDetail";
+import LanguageDetail from "../pages/student/LanguageDetail";
 import MesCertifications from "../pages/student/MesCertifications";
-import QCMPage from "../pages/student/QCMPage";
+import QCMIndexPage from "../pages/student/QCMIndexPage";
+import QCMPlayPage from "../pages/student/QCMPlayPage";
 import TPPage from "../pages/student/TPPage";
 import CodeLabPage from "../pages/student/CodeLabPage";
 import ProfilePage from "../pages/student/ProfilePage";
+import LanguagePage from "../pages/student/LanguagePage";
+
 
 /* ADMIN */
 import AdminDashboard from "../pages/admin/AdminDashboard";
@@ -51,19 +54,30 @@ export default function AppRoutes() {
 
       {/* 🔐 AUTH */}
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/admin/login" element={<AdminLogin />} />
+      
 
       {/* 🎓 STUDENT (Protected) */}
-      <Route element={<ProtectedRoute />}>
-        <Route path="/student/dashboard" element={<DashboardPage />} />
-        <Route path="/student/courses" element={<CoursesPage />} />
-        <Route path="/student/course/:id" element={<CourseDetail />} />
-        <Route path="/student/certifications" element={<MesCertifications />} />
-        <Route path="/student/qcm/:id" element={<QCMPage />} />
-        <Route path="/student/tp/:id" element={<TPPage />} />
-        <Route path="/student/codelab" element={<CodeLabPage />} />
-        <Route path="/student/profile" element={<ProfilePage />} />
-      </Route>
+{/* 🎓 STUDENT */}
+<Route element={<ProtectedRoute />}>
+
+  {/* STEP 1: ALL LANGUAGES */}
+  <Route path="/student/courses" element={<CoursesPage />} />
+
+  {/* STEP 2: SELECTED LANGUAGE */}
+  <Route path="/student/language/:languageId" element={<LanguagePage />} />
+
+  {/* STEP 3: LANGUAGE DETAILS (PDF / LESSONS) */}
+  <Route path="/student/language/:languageId/details" element={<LanguageDetail />} />
+
+  {/* OTHER */}
+  <Route path="/student/dashboard" element={<DashboardPage />} />
+  <Route path="/student/codelab" element={<CodeLabPage />} />
+  <Route path="/student/certifications" element={<MesCertifications />} />
+  <Route path="/student/qcm" element={<QCMIndexPage />} />
+  <Route path="/student/qcm/:languageId" element={<QCMPlayPage />} />
+  <Route path="/student/profile" element={<ProfilePage />} />
+
+</Route>
 
       {/* 🛠️ ADMIN (Protected + Role) */}
       <Route element={<AdminRoute />}>

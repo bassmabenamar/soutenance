@@ -1,39 +1,72 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Plus, Search, HelpCircle, BarChart2, 
-  Edit3, Trash2, ChevronLeft, ChevronRight, 
-  Clock, FileText, Database, Code2, Sparkles, PlusCircle
+  Plus, Search, BarChart2, Edit3, Trash2, ChevronLeft, ChevronRight, 
+  FileText, Database, Code2, Sparkles, Loader2
 } from 'lucide-react';
 
-// Import dial Sidebar lli khdam biha
-import Sidebar from '../../../components/layout/SidebarAdmin';
+// Import de votre Sidebar existante
+
+// Import de votre instance Axios configurée
+import API from '../../../services/api'; 
+import SidebarAdmin from '../../../components/layout/SidebarAdmin';
 
 const QCMManager = () => {
+  const navigate = useNavigate();
+  const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // --- Chargement des données depuis Laravel ---
+  useEffect(() => {
+    loadQuizzes();
+  }, []);
+
+  const loadQuizzes = async () => {
+    try {
+      setLoading(true);
+      const response = await API.get('/admin/qcm');
+      setQuizzes(response.data);
+    } catch (error) {
+      console.error("Erreur Backend:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Êtes-vous sûr de vouloir supprimer ce QCM ?")) {
+      try {
+        await API.delete(`/admin/qcm/${id}`);
+        setQuizzes(quizzes.filter(q => q.id !== id));
+      } catch (error) {
+        alert("Erreur lors de la suppression");
+      }
+    }
+  };
+
+  // Filtrage local pour la recherche
+  const filteredQuizzes = quizzes.filter(q => 
+    q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    q.category?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Stats dynamiques basées sur les données réelles
   const stats = [
-    { label: "Total Quiz", value: "24" },
-    { label: "Questions Actives", value: "342" },
-    { label: "Taux de Réussite Moyen", value: "72%", isPercent: true },
-    { label: "Drafts", value: "5" },
-  ];
-
-  const drafts = [
-    { title: "Introduction à Docker", desc: "Conteneurisation et gestion des images de base.", qs: 12, time: "2h" },
-    { title: "Algorithmes de Tri", desc: "Complexité O(n log n) et implémentations QuickSort.", qs: 8, time: "hier" },
-  ];
-
-  const publishedQuiz = [
-    { id: 1, title: "ES6 et Javascript Moderne", status: "ACTIF", desc: "Promesses, Async/Await et Déstructuration avancée.", qs: 25, resp: "1,240", success: "84%", icon: <Code2 size={20}/>, color: "text-orange-500 bg-orange-50" },
-    { id: 2, title: "SQL Intermédiaire", status: "ACTIF", desc: "Jointures complexes, sous-requêtes et optimisation.", qs: 15, resp: "856", success: "65%", icon: <Database size={20}/>, color: "text-blue-500 bg-blue-50" },
-    { id: 3, title: "Bases de Python 3.10", status: "MAINTENANCE", desc: "Structures de données, list comprehensions et décorateurs.", qs: 30, resp: "2,310", success: "78%", icon: <FileText size={20}/>, color: "text-purple-500 bg-purple-50" },
+    { label: "Total Quiz", value: quizzes.length },
+    { label: "Questions Actives", value: quizzes.reduce((acc, q) => acc + (q.qs || 0), 0) },
+    { label: "Taux de Réussite", value: "72%", isPercent: true },
+    { label: "Drafts", value: "0" },
   ];
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
-      <Sidebar />
+      <SidebarAdmin />
 
       <main className="flex-1 ml-72 p-10">
-        {/* --- Header & Nouveau Quiz --- */}
+        
+        {/* --- Header & Action --- */}
         <div className="flex justify-between items-start mb-10">
           <div>
             <h1 className="text-3xl font-black text-[#002366] mb-2">Gestionnaire de QCM</h1>
@@ -42,6 +75,7 @@ const QCMManager = () => {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/admin/qcm/add')}
             className="bg-[#F48120] text-white px-8 py-3 rounded-2xl font-black text-sm shadow-lg shadow-orange-100 flex items-center gap-2"
           >
             <Plus size={18} strokeWidth={3} />
@@ -62,49 +96,7 @@ const QCMManager = () => {
           ))}
         </div>
 
-        {/* --- Brouillons en cours --- */}
-        <section className="mb-12">
-          <div className="flex items-center gap-2 mb-6">
-            <HelpCircle size={18} className="text-slate-400" />
-            <h2 className="text-lg font-black text-[#002366]">Brouillons en cours</h2>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-6">
-            {drafts.map((draft, i) => (
-              <motion.div 
-                key={i} whileHover={{ y: -5 }}
-                className="bg-white p-6 rounded-[24px] border border-dashed border-slate-200 relative group"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <span className="bg-slate-100 text-slate-500 text-[9px] font-black px-2 py-1 rounded-md uppercase">Draft</span>
-                  <span className="text-[10px] text-slate-300 font-medium italic">Modifié il y a {draft.time}</span>
-                </div>
-                <h4 className="font-black text-[#002366] mb-2">{draft.title}</h4>
-                <p className="text-xs text-slate-400 leading-relaxed mb-6">{draft.desc}</p>
-                <div className="flex justify-between items-center border-t border-slate-50 pt-4">
-                   <span className="text-[10px] font-black text-slate-300 uppercase flex items-center gap-2">
-                     <FileText size={12} /> {draft.qs} questions
-                   </span>
-                   <div className="flex gap-2">
-                      <ActionButton icon={<Edit3 size={14}/>} color="text-orange-500 bg-orange-50" />
-                      <ActionButton icon={<Trash2 size={14}/>} color="text-red-500 bg-red-50" />
-                   </div>
-                </div>
-              </motion.div>
-            ))}
-            
-            {/* Create New Draft Button */}
-            <motion.div 
-              whileHover={{ backgroundColor: "#FDFDFF" }}
-              className="border-2 border-dashed border-slate-100 rounded-[24px] flex flex-col items-center justify-center gap-3 cursor-pointer group"
-            >
-              <PlusCircle className="text-slate-200 group-hover:text-orange-400 transition-colors" size={32} />
-              <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">Créer un nouveau brouillon</span>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* --- Quiz Publiés --- */}
+        {/* --- Liste des Quiz --- */}
         <section className="mb-10">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
@@ -115,57 +107,45 @@ const QCMManager = () => {
             </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-              <input type="text" placeholder="Rechercher un quiz..." className="bg-white border border-slate-100 rounded-xl py-2 pl-10 pr-4 text-xs font-medium outline-none focus:ring-2 focus:ring-orange-100 w-64 transition-all" />
+              <input 
+                type="text" 
+                placeholder="Rechercher un quiz..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-white border border-slate-100 rounded-xl py-2 pl-10 pr-4 text-xs font-medium outline-none focus:ring-2 focus:ring-orange-100 w-64 transition-all" 
+              />
             </div>
           </div>
 
           <div className="space-y-4">
-            {publishedQuiz.map((q) => (
-              <motion.div 
-                key={q.id} whileHover={{ scale: 1.01 }}
-                className="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-5 flex-1">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${q.color}`}>
-                    {q.icon}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-3 mb-1">
-                      <h4 className="font-black text-[#002366]">{q.title}</h4>
-                      <span className={`text-[8px] font-black px-2 py-0.5 rounded ${q.status === 'ACTIF' ? 'bg-green-50 text-green-500' : 'bg-slate-100 text-slate-400'}`}>
-                        {q.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-400">{q.desc}</p>
-                  </div>
+            <AnimatePresence>
+              {loading ? (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+                  <Loader2 className="animate-spin mb-2" size={32} />
+                  <p className="font-bold">Synchronisation avec le serveur...</p>
                 </div>
-
-                <div className="flex items-center gap-12 text-center">
-                  <StatMini label="Questions" value={q.qs} />
-                  <StatMini label="Réponses" value={q.resp} />
-                  <StatMini label="Succès" value={q.success} color="text-green-500" />
-                  
-                  <div className="flex items-center gap-3 ml-4">
-                    <ActionButton icon={<BarChart2 size={16}/>} color="text-slate-400 hover:text-[#002366]" />
-                    <ActionButton icon={<Edit3 size={16}/>} color="text-slate-400 hover:text-orange-500" />
-                    <ActionButton icon={<Trash2 size={16}/>} color="text-slate-400 hover:text-red-500" />
-                  </div>
+              ) : filteredQuizzes.length > 0 ? (
+                filteredQuizzes.map((q) => (
+                  <QuizRow key={q.id} quiz={q} onDelete={() => handleDelete(q.id)} />
+                ))
+              ) : (
+                <div className="bg-white p-10 rounded-[24px] border-2 border-dashed border-slate-100 text-center text-slate-400">
+                   Aucun quiz trouvé.
                 </div>
-              </motion.div>
-            ))}
+              )}
+            </AnimatePresence>
           </div>
         </section>
 
         {/* --- Pagination --- */}
         <div className="flex justify-center items-center gap-3 mb-12">
-           <ChevronLeft className="text-slate-300 cursor-pointer" size={20} />
+           <ChevronLeft className="text-slate-300 cursor-pointer hover:text-orange-500 transition-colors" size={20} />
            <PageNum num={1} active />
            <PageNum num={2} />
-           <PageNum num={3} />
-           <ChevronRight className="text-slate-300 cursor-pointer" size={20} />
+           <ChevronRight className="text-slate-300 cursor-pointer hover:text-orange-500 transition-colors" size={20} />
         </div>
 
-        {/* --- Bottom AI Promo Card --- */}
+        {/* --- AI Promo Card --- */}
         <motion.div 
           whileHover={{ y: -5 }}
           className="relative rounded-[40px] overflow-hidden bg-[#002366] p-12 text-white flex items-center justify-between"
@@ -188,9 +168,66 @@ const QCMManager = () => {
   );
 };
 
-// --- Helpers ---
-const ActionButton = ({ icon, color }) => (
-  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className={`p-2 rounded-lg transition-colors ${color}`}>
+// --- Composant Ligne de Quiz ---
+const QuizRow = ({ quiz, onDelete }) => {
+  // Déterminer l'icône selon la catégorie
+  const isDev = quiz.category?.toLowerCase().includes('web') || quiz.category?.toLowerCase().includes('js');
+  const isData = quiz.category?.toLowerCase().includes('sql') || quiz.category?.toLowerCase().includes('data');
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={{ scale: 1.01 }}
+      className="bg-white p-5 rounded-[24px] shadow-sm border border-slate-50 flex items-center justify-between"
+    >
+      <div className="flex items-center gap-5 flex-1">
+        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+          isDev ? 'text-orange-500 bg-orange-50' : isData ? 'text-blue-500 bg-blue-50' : 'text-purple-500 bg-purple-50'
+        }`}>
+          {isDev ? <Code2 size={20}/> : isData ? <Database size={20}/> : <FileText size={20}/>}
+        </div>
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <h4 className="font-black text-[#002366]">{quiz.title}</h4>
+            <span className={`text-[8px] font-black px-2 py-0.5 rounded ${
+              quiz.status === 'PUBLISHED' || quiz.status === 'ACTIF' ? 'bg-green-50 text-green-500' : 'bg-slate-100 text-slate-400'
+            }`}>
+              {quiz.status}
+            </span>
+          </div>
+          <p className="text-xs text-slate-400">{quiz.category}</p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-12 text-center">
+        <StatMini label="Questions" value={quiz.qs || 0} />
+        <StatMini label="Réponses" value={quiz.resp || 0} />
+        <StatMini label="Succès" value={quiz.success || "0%"} color="text-green-500" />
+        
+        <div className="flex items-center gap-3 ml-4">
+          <ActionButton icon={<BarChart2 size={16}/>} color="text-slate-400 hover:text-[#002366]" />
+          <ActionButton icon={<Edit3 size={16}/>} color="text-slate-400 hover:text-orange-500" />
+          <ActionButton 
+            icon={<Trash2 size={16}/>} 
+            color="text-slate-400 hover:text-red-500" 
+            onClick={onDelete}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// --- Helpers de style ---
+const ActionButton = ({ icon, color, onClick }) => (
+  <motion.button 
+    whileHover={{ scale: 1.1 }} 
+    whileTap={{ scale: 0.9 }} 
+    onClick={onClick}
+    className={`p-2 rounded-lg transition-colors ${color}`}
+  >
     {icon}
   </motion.button>
 );
@@ -203,7 +240,9 @@ const StatMini = ({ label, value, color = "text-[#002366]" }) => (
 );
 
 const PageNum = ({ num, active = false }) => (
-  <button className={`w-9 h-9 rounded-xl font-black text-sm transition-all ${active ? 'bg-[#F48120] text-white shadow-lg shadow-orange-100' : 'text-slate-400 hover:bg-white'}`}>
+  <button className={`w-9 h-9 rounded-xl font-black text-sm transition-all ${
+    active ? 'bg-[#F48120] text-white shadow-lg shadow-orange-100' : 'text-slate-400 hover:bg-white'
+  }`}>
     {num}
   </button>
 );

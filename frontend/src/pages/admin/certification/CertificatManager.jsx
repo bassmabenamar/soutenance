@@ -1,195 +1,191 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  Settings, Eye, Download, History, Plus, 
-  Search, CheckCircle2, Clock, XCircle, 
-  Sparkles, FileText, ChevronLeft, ChevronRight,
-  Info, ShieldCheck, RotateCw
+  Settings, Eye, Download, History, Search, 
+  Info, ShieldCheck, Loader2, Save, RefreshCw 
 } from 'lucide-react';
 
-// Import dial Sidebar dialk (style EduSaaS)
-import Sidebar from '../../../components/layout/SidebarAdmin';
+// Import de votre instance API
+import API from '../../../services/api';
+import SidebarAdmin from '../../../components/layout/SidebarAdmin';
 
 const CertificatManager = () => {
-  const tableData = [
-    { id: "JD", name: "Jean-Baptiste Durand", email: "jb.durand@example.com", path: "Frontend React", progress: 92, status: "Validé", color: "green" },
-    { id: "SM", name: "Sarah Martin", email: "sarah.m@gmail.com", path: "Fullstack JS", progress: 78, status: "En attente", color: "orange" },
-    { id: "ML", name: "Marc Lefebvre", email: "m.lefe@entreprise.fr", path: "Backend Node", progress: 45, status: "Inéligible", color: "slate" },
-  ];
+  // --- ÉTATS ---
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [stats, setStats] = useState({ total: 0, delivered: 0 });
+  const [rules, setRules] = useState([]); // Tableau d'objets { label, value, key }
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Variants dial l-premium animations
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  // --- CHARGEMENT DES DONNÉES ---
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [resStats, resStudents, resRules] = await Promise.all([
+        API.get('/admin/certificates/stats'),
+        API.get('/admin/certificates/eligibility'),
+        API.get('/admin/certificates/rules')
+      ]);
+      setStats(resStats.data);
+      setStudents(resStudents.data);
+      setRules(resRules.data);
+    } catch (err) {
+      console.error("Erreur lors de la récupération des données", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fadeInUp = {
-    hidden: { y: 25, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 120, damping: 14 } }
+  useEffect(() => { fetchData(); }, []);
+
+  // --- ACTIONS ---
+  const handleUpdateRules = async () => {
+    setUpdating(true);
+    try {
+      await API.post('/admin/certificates/rules/update', { rules });
+      // Notification de succès ici (Toast)
+    } catch (err) {
+      alert("Erreur lors de la sauvegarde des règles");
+    } finally {
+      setUpdating(false);
+    }
   };
+
+  const downloadPDF = async (studentId) => {
+    try {
+      const response = await API.get(`/admin/certificates/generate/${studentId}`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `certificat_${studentId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      console.error("Erreur de téléchargement", err);
+    }
+  };
+
+  // Filtrage local
+  const filteredStudents = students.filter(s => 
+    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    s.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
-      <Sidebar activePage="Certifications" />
+      <SidebarAdmin />
 
       <motion.main 
-        initial="hidden" animate="visible" variants={containerVariants}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
         className="flex-1 ml-72 p-10 space-y-8"
       >
-        {/* --- Header Section --- */}
+        {/* Header */}
         <div className="flex justify-between items-start">
-          <motion.div variants={fadeInUp}>
-            <h1 className="text-3xl font-black text-[#002366] tracking-tight mb-2">Gestion des Certifications</h1>
-            <p className="text-slate-400 text-sm font-medium">Configurez les règles d'obtention et gérez les diplômes des étudiants.</p>
-          </motion.div>
+          <div>
+            <h1 className="text-3xl font-[1000] text-[#002366] tracking-tight mb-2">Gestion des Certifications</h1>
+            <p className="text-slate-400 text-sm font-medium italic">Synchronisé avec le moteur de progression en temps réel.</p>
+          </div>
           <div className="flex gap-4">
-            <motion.button 
-              whileHover={{ scale: 1.05, backgroundColor: "#f8fafc" }}
-              whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-100 rounded-2xl text-xs font-black text-slate-500 shadow-sm transition-all"
-            >
-              <motion.div whileHover={{ rotate: -180 }} transition={{ duration: 0.5 }}>
-                <History size={16} />
-              </motion.div>
-              Logs d'audit
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(179, 86, 0, 0.25)" }} 
-              whileTap={{ scale: 0.95 }}
-              className="bg-[#B35600] text-white px-8 py-3 rounded-2xl font-black text-xs shadow-lg shadow-orange-100/50"
-            >
-              Nouvelle Règle
-            </motion.button>
+             <button onClick={fetchData} className="p-3 bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-[#B35600] transition-colors shadow-sm">
+                <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+             </button>
+             <motion.button 
+               whileHover={{ scale: 1.05 }}
+               className="bg-[#B35600] text-white px-8 py-3 rounded-2xl font-black text-xs shadow-lg shadow-orange-100/50"
+             >
+               Logs de Sécurité
+             </motion.button>
           </div>
         </div>
 
-        {/* --- Stats Row --- */}
+        {/* Stats Row */}
         <div className="grid grid-cols-5 gap-6">
-          <StatMini label="Total Créées" value="1,284" sub="+12% ce mois" subColor="text-green-500" />
-          <StatMini label="Délivrées" value="842" sub="65% taux de succès" subColor="text-orange-500" />
-          <StatProgress label="HTML" value={320} color="bg-orange-400" />
-          <StatProgress label="CSS" value={245} color="bg-blue-600" />
-          <StatProgress label="JS" value={277} color="bg-orange-500" />
+          <StatMini label="Total Créées" value={loading ? "..." : stats.total} sub="+12% ce mois" subColor="text-green-500" />
+          <StatMini label="Délivrées" value={loading ? "..." : stats.delivered} sub="Taux auto-généré" subColor="text-orange-500" />
+          {/* Dynamique : Les 3 premiers langages */}
+          {rules.slice(0, 3).map((rule, idx) => (
+            <StatProgress key={idx} label={rule.label} value={rule.value} color={idx === 0 ? "bg-orange-400" : "bg-blue-600"} />
+          ))}
         </div>
 
-        {/* --- Middle Section: Rules & Preview --- */}
         <div className="grid grid-cols-12 gap-8">
           {/* Rules Configuration */}
-          <motion.div 
-            variants={fadeInUp} 
-            whileHover={{ y: -5, shadow: "0 25px 50px -12px rgba(0, 0, 0, 0.08)" }}
-            className="col-span-4 bg-white rounded-[40px] p-8 border border-slate-50 shadow-sm space-y-8 transition-shadow"
-          >
-            <div className="flex items-center gap-3 group">
-              <motion.div 
-                whileHover={{ rotate: 180 }} 
-                transition={{ type: "spring", stiffness: 200 }}
-                className="p-2 bg-orange-50 rounded-xl text-[#B35600]"
-              >
-                <Settings size={20} />
-              </motion.div>
-              <h3 className="font-black text-[#002366]">Configuration des Règles</h3>
+          <div className="col-span-4 bg-white rounded-[40px] p-8 border border-slate-50 shadow-sm space-y-8">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-50 rounded-xl text-[#B35600]"><Settings size={20} /></div>
+              <h3 className="font-black text-[#002366]">Seuils d'obtention</h3>
             </div>
             
             <div className="space-y-4">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Progrès minimum requis (%)</p>
-              <RuleInput label="HTML" value="80" />
-              <RuleInput label="CSS" value="80" />
-              <RuleInput label="Bootstrap" value="85" />
-              <RuleInput label="JS Core" value="75" />
+              {rules.map((rule, index) => (
+                <div key={index} className="flex items-center justify-between group">
+                  <span className="text-xs font-bold text-slate-500">{rule.label}</span>
+                  <input 
+                    type="number"
+                    value={rule.value}
+                    onChange={(e) => {
+                        const newRules = [...rules];
+                        newRules[index].value = e.target.value;
+                        setRules(newRules);
+                    }}
+                    className="w-20 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-black text-[#002366] text-right outline-none focus:ring-2 ring-orange-100" 
+                  />
+                </div>
+              ))}
             </div>
 
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full py-4 bg-[#B35600] text-white rounded-2xl font-black text-xs shadow-md"
+            <button 
+              onClick={handleUpdateRules}
+              disabled={updating}
+              className="w-full py-4 bg-[#B35600] text-white rounded-2xl font-black text-xs shadow-md flex items-center justify-center gap-2 hover:brightness-110 disabled:opacity-50"
             >
-              Enregistrer les modifications
-            </motion.button>
+              {updating ? <Loader2 className="animate-spin" size={16} /> : <><Save size={16}/> Enregistrer les seuils</>}
+            </button>
 
             <div className="bg-blue-50/50 p-6 rounded-3xl flex gap-4 border border-blue-100/50">
               <Info className="text-blue-500 shrink-0" size={20} />
-              <div>
-                <h4 className="text-[11px] font-black text-blue-800 mb-1">Logique de déblocage</h4>
-                <p className="text-[10px] text-blue-600 font-bold leading-relaxed">
-                  Les certificats sont automatiquement générés dès qu'un étudiant atteint le seuil de progression défini.
-                </p>
-              </div>
+              <p className="text-[10px] text-blue-600 font-bold leading-relaxed">
+                Modifier ces valeurs impactera immédiatement l'éligibilité des étudiants n'ayant pas encore reçu leur diplôme.
+              </p>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Certificate Preview */}
-          <motion.div 
-            variants={fadeInUp} 
-            whileHover={{ scale: 1.01 }}
-            className="col-span-8 bg-white rounded-[40px] p-8 border border-slate-50 shadow-sm flex flex-col items-center"
-          >
-            <div className="w-full flex items-center gap-3 mb-8">
-              <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.7 }} className="p-2 bg-orange-50 rounded-xl text-[#B35600]">
-                <Eye size={20} />
-              </motion.div>
-              <h3 className="font-black text-[#002366]">Aperçu du Certificat</h3>
-            </div>
-
-            {/* Visual Cert (M-cloné men l-image) with 3D Effect */}
-            <motion.div 
-              whileHover={{ perspective: 1000, rotateX: 2, rotateY: -2 }}
-              className="relative w-[500px] aspect-[4/3] bg-white shadow-[0_30px_60px_rgba(0,0,0,0.06)] border-8 border-slate-50 p-10 flex flex-col items-center justify-between text-center mb-8 transition-transform"
-            >
-               <div className="space-y-2">
-                 <h2 className="text-[#B35600] font-black text-xl tracking-[4px] uppercase">Codebook Academy</h2>
-                 <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Certificat d'excellence</p>
-               </div>
-               
-               <div className="space-y-4">
-                 <p className="text-[10px] text-slate-400">Ceci certifie que</p>
-                 <h1 className="text-4xl font-black text-[#002366] leading-tight">Jean-Baptiste<br/>Durand</h1>
-                 <p className="text-[10px] text-slate-400 max-w-[300px] mx-auto font-medium">a complété avec succès le parcours intensif de Développement frontend Avancé (JS/React)</p>
-               </div>
-
-               <div className="w-full flex justify-between items-end px-4">
-                  <div className="text-left">
-                    <p className="text-[7px] font-black text-slate-300 uppercase">Date d'émission</p>
-                    <p className="text-[9px] font-black text-[#002366]">24 Octobre 2023</p>
-                  </div>
-                  <motion.div 
-                    animate={{ scale: [1, 1.1, 1] }} 
-                    transition={{ repeat: Infinity, duration: 3 }}
-                    className="w-12 h-12 rounded-full border-2 border-orange-100 flex items-center justify-center text-orange-500"
-                  >
-                    <ShieldCheck size={24} fill="currentColor" className="text-white fill-orange-500" />
-                  </motion.div>
-                  <div className="text-right">
-                    <p className="text-[7px] font-black text-slate-300 uppercase">Signature</p>
-                    <p className="text-[9px] font-black text-[#002366]">Le Directeur Pédagogique</p>
-                  </div>
-               </div>
-            </motion.div>
-
-            <div className="flex gap-4">
-              <motion.button 
-                whileHover={{ scale: 1.05, y: -2 }}
-                className="px-8 py-4 bg-white border-2 border-slate-100 rounded-2xl font-black text-xs text-slate-500 flex items-center gap-3 shadow-sm"
-              >
-                <Download size={18} /> Télécharger PDF
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.05, y: -2 }}
-                className="px-8 py-4 bg-[#B35600] text-white rounded-2xl font-black text-xs flex items-center gap-3 shadow-lg shadow-orange-100"
-              >
-                <Sparkles size={18} /> Générer certificat
-              </motion.button>
-            </div>
-          </motion.div>
+          {/* Certificate Preview (Statique Visuel) */}
+          <div className="col-span-8 bg-white rounded-[40px] p-8 border border-slate-50 shadow-sm flex flex-col items-center justify-center">
+             <div className="text-center mb-8">
+                <ShieldCheck size={48} className="text-orange-500 mx-auto mb-4" />
+                <h3 className="font-black text-[#002366] text-xl">Aperçu du Template Actif</h3>
+                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-2">ID: CERT-DEFAULT-2024</p>
+             </div>
+             
+             {/* Le certificat miniature style premium */}
+             <div className="w-[480px] aspect-[1.4/1] bg-slate-50 rounded-2xl border-4 border-white shadow-xl relative overflow-hidden flex flex-col items-center justify-center p-10">
+                <div className="absolute top-0 left-0 w-full h-2 bg-[#B35600]"></div>
+                <h2 className="text-[#B35600] font-black text-lg tracking-[3px] mb-8">CODEBOOK ACADEMY</h2>
+                <div className="h-px w-12 bg-slate-200 mb-6"></div>
+                <p className="text-[10px] font-black text-slate-800 tracking-tighter italic">"Délivré pour excellence académique"</p>
+                <div className="mt-auto w-full flex justify-between opacity-30">
+                   <div className="w-10 h-10 bg-slate-200 rounded-full"></div>
+                   <div className="w-16 h-4 bg-slate-200 rounded-lg"></div>
+                </div>
+             </div>
+          </div>
         </div>
 
-        {/* --- Bottom Table Section --- */}
-        <motion.div variants={fadeInUp} className="bg-white rounded-[40px] border border-slate-50 shadow-sm overflow-hidden">
+        {/* Students Table */}
+        <div className="bg-white rounded-[40px] border border-slate-50 shadow-sm overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex justify-between items-center">
             <h3 className="text-xl font-black text-[#002366]">Étudiants & Éligibilité</h3>
-            <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-[#B35600] transition-colors" size={16} />
-              <input type="text" placeholder="Rechercher un étudiant..." className="pl-12 pr-6 py-3 bg-slate-50/50 rounded-2xl text-xs font-bold w-64 outline-none focus:ring-2 ring-orange-100 transition-all border border-transparent focus:border-orange-100" />
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
+              <input 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                type="text" 
+                placeholder="Filtrer par nom ou email..." 
+                className="pl-12 pr-6 py-3 bg-slate-50/50 rounded-2xl text-xs font-bold w-72 outline-none focus:ring-2 ring-orange-100" 
+              />
             </div>
           </div>
 
@@ -199,127 +195,72 @@ const CertificatManager = () => {
                 <th className="px-10 py-6">Étudiant</th>
                 <th className="px-10 py-6">Parcours</th>
                 <th className="px-10 py-6">Progression</th>
-                <th className="px-10 py-6">Status</th>
                 <th className="px-10 py-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {tableData.map((row, i) => (
-                <motion.tr 
-                  key={i} 
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.1 }}
-                  className="border-b border-slate-50 group hover:bg-slate-50/80 transition-all"
-                >
-                  <td className="px-10 py-6">
-                    <div className="flex items-center gap-4">
-                      <motion.div 
-                        whileHover={{ rotate: 360, scale: 1.1 }}
-                        transition={{ duration: 0.6 }}
-                        className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 font-black text-xs cursor-pointer"
+              {loading ? (
+                <tr><td colSpan="4" className="text-center py-20"><Loader2 className="animate-spin mx-auto text-slate-200" size={40} /></td></tr>
+              ) : (
+                filteredStudents.map((row, i) => (
+                  <tr key={i} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-black text-xs uppercase">{row.name.substring(0,2)}</div>
+                        <div>
+                          <p className="text-sm font-black text-[#002366]">{row.name}</p>
+                          <p className="text-[10px] font-bold text-slate-300">{row.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-10 py-6 text-xs font-bold text-slate-500">{row.path}</td>
+                    <td className="px-10 py-6">
+                       <div className="flex items-center gap-4">
+                          <span className="text-xs font-black text-[#002366]">{row.progress}%</span>
+                          <div className={`px-3 py-1 rounded-full text-[9px] font-black ${row.progress >= 80 ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                            {row.progress >= 80 ? 'ÉLIGIBLE' : 'EN COURS'}
+                          </div>
+                       </div>
+                    </td>
+                    <td className="px-10 py-6 text-right">
+                      <button 
+                        onClick={() => downloadPDF(row.id)}
+                        disabled={row.progress < 80}
+                        className={`p-3 rounded-xl transition-all ${row.progress >= 80 ? 'text-[#B35600] hover:bg-orange-50' : 'text-slate-200 cursor-not-allowed'}`}
                       >
-                        {row.id}
-                      </motion.div>
-                      <div>
-                        <p className="text-sm font-black text-[#002366] group-hover:text-[#B35600] transition-colors">{row.name}</p>
-                        <p className="text-[10px] font-bold text-slate-300">{row.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-10 py-6 text-xs font-bold text-slate-500">{row.path}</td>
-                  <td className="px-10 py-6">
-                    <div className="flex items-center gap-4">
-                      <span className="text-xs font-black text-[#002366] w-8">{row.progress}%</span>
-                      <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ width: 0 }} 
-                          animate={{ width: `${row.progress}%` }} 
-                          transition={{ duration: 1, ease: "easeOut" }}
-                          className={`h-full ${row.color === 'green' ? 'bg-green-500' : row.color === 'orange' ? 'bg-orange-500' : 'bg-slate-300'}`} 
-                        />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-10 py-6">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black ${
-                      row.color === 'green' ? 'text-green-600 bg-green-50' : 
-                      row.color === 'orange' ? 'text-orange-600 bg-orange-50' : 'text-slate-500 bg-slate-50'
-                    }`}>
-                      <motion.div 
-                        animate={{ opacity: [1, 0.5, 1] }} 
-                        transition={{ repeat: Infinity, duration: 2 }}
-                        className={`w-1.5 h-1.5 rounded-full ${row.color === 'green' ? 'bg-green-500' : row.color === 'orange' ? 'bg-orange-500' : 'bg-slate-400'}`} 
-                      />
-                      {row.status}
-                    </div>
-                  </td>
-                  <td className="px-10 py-6 text-right space-x-3">
-                    <motion.button whileHover={{ scale: 1.2, color: "#002366" }} className="text-slate-300 transition-colors"><Eye size={18}/></motion.button>
-                    <motion.button whileHover={{ scale: 1.2, color: "#ef4444" }} className="text-slate-300 transition-colors"><XCircle size={18}/></motion.button>
-                  </td>
-                </motion.tr>
-              ))}
+                        <Download size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
-          
-          <div className="p-8 flex justify-between items-center text-slate-300 font-bold text-[11px] uppercase tracking-widest">
-            <span>Affichage de 1 à 3 sur 124 étudiants</span>
-            <div className="flex gap-2">
-              <motion.button whileHover={{ x: -3 }} className="px-4 py-2 border border-slate-100 rounded-xl hover:bg-slate-50 transition-all flex items-center gap-1"><ChevronLeft size={14}/> Précédent</motion.button>
-              <button className="px-4 py-2 bg-orange-50 text-orange-600 rounded-xl font-black">1</button>
-              <button className="px-4 py-2 border border-slate-100 rounded-xl hover:bg-slate-50 transition-all">2</button>
-              <motion.button whileHover={{ x: 3 }} className="px-4 py-2 border border-slate-100 rounded-xl hover:bg-slate-50 transition-all flex items-center gap-1">Suivant <ChevronRight size={14}/></motion.button>
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </motion.main>
     </div>
   );
 };
 
-// --- Helper Components with Extra Scale & Hover ---
+// --- Sous-composants restants identiques au style initial ---
 const StatMini = ({ label, value, sub, subColor }) => (
-  <motion.div 
-    whileHover={{ y: -8, scale: 1.02, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.05)" }}
-    className="bg-white p-6 rounded-[32px] border border-slate-50 shadow-sm transition-all cursor-default"
-  >
+  <div className="bg-white p-6 rounded-[32px] border border-slate-50 shadow-sm transition-all">
     <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">{label}</p>
-    <p className="text-2xl font-black text-[#002366] mb-1">{value}</p>
+    <p className="text-2xl font-[1000] text-[#002366] mb-1">{value}</p>
     <p className={`text-[10px] font-black ${subColor}`}>{sub}</p>
-  </motion.div>
+  </div>
 );
 
 const StatProgress = ({ label, value, color }) => (
-  <motion.div 
-    whileHover={{ y: -8, scale: 1.02 }}
-    className="bg-white p-6 rounded-[32px] border border-slate-50 shadow-sm space-y-3 cursor-default"
-  >
+  <div className="bg-white p-6 rounded-[32px] border border-slate-50 shadow-sm space-y-3">
     <div className="flex justify-between items-center font-black">
       <span className="text-[10px] text-slate-300 uppercase">{label}</span>
       <span className="text-sm text-[#002366]">{value}</span>
     </div>
-    <div className="w-full h-1 bg-slate-50 rounded-full overflow-hidden">
-      <motion.div 
-        initial={{ width: 0 }} 
-        animate={{ width: '60%' }} 
-        transition={{ duration: 1.2, ease: "anticipate" }}
-        className={`h-full ${color}`} 
-      />
+    <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden">
+      <div className={`h-full ${color}`} style={{ width: '70%' }} />
     </div>
-  </motion.div>
-);
-
-const RuleInput = ({ label, value }) => (
-  <motion.div whileHover={{ x: 5 }} className="flex items-center justify-between group">
-    <span className="text-xs font-bold text-slate-500 group-hover:text-[#B35600] transition-colors">{label}</span>
-    <motion.input 
-      whileFocus={{ scale: 1.05, borderColor: "#B35600" }}
-      type="text" 
-      defaultValue={value} 
-      className="w-24 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-black text-[#002366] text-right outline-none transition-all focus:ring-2 ring-orange-50" 
-    />
-  </motion.div>
+  </div>
 );
 
 export default CertificatManager;
