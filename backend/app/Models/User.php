@@ -4,30 +4,44 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+use App\Models\Device;
 class User extends Authenticatable
 {
-    use HasApiTokens;
+        use HasApiTokens,HasFactory, Notifiable;
 
     protected $fillable = [
-        'name',
+       
+        'password',
         'access_code',
         'role',
-        'status',
-        'progress'
+        'device_id',
+        'is_active'
     ];
 
-    protected $hidden = [];
+    public function certifications()
+    {
+        return $this->hasMany(Certification::class);
+    }
 
-    // 📱 devices (max 3 login devices)
+    public function badges()
+    {
+        return $this->hasMany(Badge::class);
+    }
+
+    public function courseProgress()
+    {
+        return $this->hasMany(CourseProgress::class);
+    }
+
+    public function qcmAttempts()
+    {
+        return $this->hasMany(QcmAttempt::class);
+    }
+
     public function devices()
     {
         return $this->hasMany(Device::class);
-    }
-
-    // 🏆 quiz results
-    public function results()
-    {
-        return $this->hasMany(Result::class);
     }
 }

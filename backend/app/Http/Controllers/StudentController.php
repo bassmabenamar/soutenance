@@ -3,119 +3,90 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\QCM;
-use Illuminate\Support\Facades\Auth;
+
 class StudentController extends Controller
 {
-    public function dashboard()
-    {
-        $user = auth()->user();
-
-        return response()->json([
-            'stats' => [
-                'globalProgress' => 38,
-                'learningTime' => '24h 45m',
-                'weeklyTrend' => '+12%',
-                'currentModule' => 3
-            ],
-            'courses' => [
-                ['title' => 'HTML5', 'progress' => 95, 'tag' => 'Presque fini', 'color' => 'bg-orange-500'],
-                ['title' => 'CSS Modern', 'progress' => 45, 'tag' => 'En cours', 'color' => 'bg-blue-500'],
-                ['title' => 'JavaScript ES6', 'progress' => 12, 'tag' => 'Débutant', 'color' => 'bg-yellow-500'],
-                ['title' => 'Bootstrap 5', 'progress' => 0, 'tag' => 'Pas commencé', 'color' => 'bg-slate-200'],
-            ],
-            'activities' => [
-                [
-                    'type' => 'quiz',
-                    'title' => 'Quiz réussi : Flexbox Mastery',
-                    'subtitle' => 'Score : 18/20',
-                    'xp' => '+50 XP',
-                    'time' => 'Il y a 2 heures'
-                ],
-            ]
-        ]);
-    }
-
-
-
-public function certifications()
+   public function dashboard(Request $request)
 {
-    $user = Auth::user();
-
-    // Exemple logique simple (à adapter selon ton système)
-    $certifications = QCM::with('questions')
-        ->get()
-        ->map(function ($qcm) use ($user) {
-
-            $total = $qcm->questions->count();
-
-            // fake progress (à remplacer par vraie table results si tu as)
-            $progress = rand(0, 100);
-
-            return [
-                'id' => $qcm->id,
-                'title' => 'Certificat ' . $qcm->category,
-                'status' => $progress >= 80 ? 'Obtenu' : ($progress > 0 ? 'Disponible' : 'Verrouillé'),
-                'desc' => 'Certification sur ' . $qcm->category,
-                'type' => $qcm->category,
-                'progress' => $progress,
-                'active' => $progress >= 80,
-                'locked' => $progress < 30,
-            ];
-        });
+    $user = $request->user();
 
     return response()->json([
-        'certs' => $certifications
+        'stats' => [
+            'globalProgress' => 65,
+            'learningTime' => '12h 30m',
+            'weeklyTrend' => '18%',
+            'currentModule' => 2
+        ],
+
+        'courses' => [
+            [
+                'id' => 1,
+                'title' => 'HTML & CSS Basics',
+                'progress' => 80,
+                'tag' => 'Frontend',
+                'color' => 'bg-blue-500'
+            ],
+            [
+                'id' => 2,
+                'title' => 'JavaScript Fundamentals',
+                'progress' => 45,
+                'tag' => 'JS',
+                'color' => 'bg-yellow-500'
+            ],
+            [
+                'id' => 3,
+                'title' => 'React Advanced',
+                'progress' => 20,
+                'tag' => 'React',
+                'color' => 'bg-purple-500'
+            ]
+        ],
+
+        'activities' => [
+            [
+                'type' => 'quiz',
+                'title' => 'Quiz HTML terminé',
+                'subtitle' => 'HTML Basics',
+                'time' => '2h ago',
+                'xp' => 120
+            ],
+            [
+                'type' => 'lesson',
+                'title' => 'Cours CSS complété',
+                'subtitle' => 'Flexbox',
+                'time' => '1 day ago',
+                'xp' => 80
+            ]
+        ]
     ]);
 }
-
 public function profile()
 {
-    $user = Auth::user();
+    $user = auth()->user();
 
     return response()->json([
         "name" => $user->name,
-        "email" => $user->email,
 
-        // 🔐 Security
-        "access_code" => "CB-" . $user->id . "-XYZ",
-        "device_id" => request()->ip(),
-        "is_active" => true,
+        // ❌ SUPPRIMÉ : email
 
-        // 📊 Stats
+        "access_code" => $user->access_code,
+        "device_id" => $user->device_id,
+        "is_active" => $user->is_active,
+
         "stats" => [
-            "completed_courses" => 12, // later from DB
-            "xp" => 480
+            "completed_courses" => 12,
+            "xp" => 482
         ],
 
-        // 📈 Skills
         "skills" => [
-            ["name" => "HTML", "level" => 90],
-            ["name" => "CSS", "level" => 70],
-            ["name" => "JavaScript", "level" => 50],
+            ["name" => "JavaScript", "level" => 78],
+            ["name" => "Backend", "level" => 45]
         ],
 
-        // 🏆 Badges
         "badges" => [
-            [
-                "name" => "Génie Code",
-                "type" => "code",
-                "color" => "bg-orange-50 text-orange-500"
-            ],
-            [
-                "name" => "Rapide",
-                "type" => "speed",
-                "color" => "bg-blue-50 text-blue-500"
-            ],
-            [
-                "name" => "Bug Hunter",
-                "type" => "bug",
-                "color" => "bg-green-50 text-green-500"
-            ]
-        ],
-
-        // 🖼 Avatar
-        "avatar_url" => null
+            ["name" => "Génie", "type" => "code", "color" => "bg-orange-50 text-orange-500"],
+            ["name" => "Rapide", "type" => "speed", "color" => "bg-blue-50 text-blue-500"]
+        ]
     ]);
 }
 }

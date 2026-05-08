@@ -16,7 +16,11 @@ const TPManager = () => {
   const [tps, setTps] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [stats, setStats] = useState({ total: 0, averageDifficulty: '...', activeStudents: 0 });
+  const [stats, setStats] = useState({
+  total: 0,
+  averageDifficulty: '...',
+  activeStudents: 0
+});
 
   // --- CHARGEMENT DES DONNÉES ---
   useEffect(() => {
@@ -24,18 +28,24 @@ const TPManager = () => {
   }, []);
 
   const fetchTPs = async () => {
-    setLoading(true);
-    try {
-      const response = await API.get('/admin/tp'); // Votre route GET
-      setTps(response.data.tps);
-      setStats(response.data.stats); // Supposons que le backend renvoie aussi les stats
-    } catch (error) {
-      console.error("Erreur lors du chargement des TP:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const response = await API.get('/admin/tp');
 
+    setTps(response.data?.tps || []);
+
+    setStats({
+      total: response.data?.stats?.total ?? 0,
+      averageDifficulty: response.data?.stats?.averageDifficulty ?? '...',
+      activeStudents: response.data?.stats?.activeStudents ?? 0
+    });
+
+  } catch (error) {
+    console.error("Erreur lors du chargement des TP:", error);
+  } finally {
+    setLoading(false);
+  }
+};
   // --- SUPPRESSION ---
   const handleDelete = async (id) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer ce TP ?")) {

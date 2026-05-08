@@ -10,13 +10,19 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
 
-            $table->id(); // 🔥 REQUIRED
+            $table->id();
 
+            // REQUIRED FOR AUTH
             $table->string('name');
-            $table->string('access_code')->unique();
+           
+            $table->string('password');
+
+            // YOUR CUSTOM FIELDS
+            $table->string('access_code')->unique()->nullable();
             $table->string('role')->default('student');
-            $table->string('status')->default('Actif'); // Actif or Bloqué
-            $table->integer('progress')->default(0);    // Progress percentage
+            $table->string('device_id')->nullable();
+            $table->boolean('is_active')->default(true);
+
             $table->rememberToken();
             $table->timestamps();
         });

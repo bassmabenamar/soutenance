@@ -3,13 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
-class TP extends Model
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+class Tp extends Model
 {
-    protected $table = 't_p_s';
+    use HasFactory;
 
     protected $fillable = [
         'title',
-        'description'
+        'category',
+        'difficulty',
+        'description',
+        'instructions',
+        'estimated_time',
+        'is_published',
+        'auto_correction',
+        'file_path',
+        'thumbnail',
     ];
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class);
+    }
 }

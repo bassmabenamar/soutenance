@@ -5,26 +5,42 @@ import {
 } from 'lucide-react';
 import Sidebar from "../../components/layout/SidebarStudent";
 import API from "../../services/api"; // Votre instance Axios configurée
+import { useNavigate } from "react-router-dom";
 
 const DashboardPage = () => {
-  const [data, setData] = useState(null);
+  const [data, setData] = useState({stats: {
+    globalProgress: 0,
+    learningTime: "0h",
+    weeklyTrend: "0%",
+    currentModule: 0
+  },
+  courses: [],
+  activities: []
+});
+
+const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        // Appel à votre backend Laravel
-        const response = await API.get('/student/dashboard'); 
-        setData(response.data);
-      } catch (err) {
-        console.error("Erreur de chargement du dashboard", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchDashboardData = async () => {
+    try {
+      const response = await API.get('/student/dashboard');
 
-    fetchDashboardData();
-  }, []);
+      setData({
+        stats: response.data.stats || {},
+        courses: response.data.courses || [],
+        activities: response.data.activities || []
+      });
+
+    } catch (err) {
+      console.error("Erreur dashboard:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchDashboardData();
+}, []);
 
   if (loading) {
     return (
@@ -87,7 +103,7 @@ const DashboardPage = () => {
                 progress={course.progress || 0} 
                 tag={course.tag || "Module"} 
                 color={course.color || "bg-blue-500"} 
-                onClick={() => window.location.href = `/student/course/${course.id}`}
+                onClick={() => navigate(`/student/course/${course.id}`)}
               />
             ))}
           </div>

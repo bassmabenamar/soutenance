@@ -11,27 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('results', function (Blueprint $table) {
+        Schema::create('results', function (Blueprint $table) {
     $table->id();
-
-    // 🔥 MUST match BIGINT UNSIGNED
-    $table->unsignedBigInteger('user_id');
-    $table->unsignedBigInteger('q_c_m_id');
+    $table->foreignId('user_id')->constrained()->onDelete('cascade');
+    $table->foreignId('qcm_id')->constrained()->onDelete('cascade');
 
     $table->integer('score');
+    $table->boolean('passed')->default(false);
 
     $table->timestamps();
-
-    // 🔥 FOREIGN KEYS (manual safe version)
-    $table->foreign('user_id')
-        ->references('id')
-        ->on('users')
-        ->onDelete('cascade');
-
-    $table->foreign('q_c_m_id')
-        ->references('id')
-        ->on('q_c_m_s')
-        ->onDelete('cascade');
 });
     }
 

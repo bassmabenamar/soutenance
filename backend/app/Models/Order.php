@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Certificate extends Model
+class Order extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
-        'progress',
-        'is_eligible',
-        'is_delivered'
+        'product_name',
+        'price',
+        'status'
     ];
 
     public function user()

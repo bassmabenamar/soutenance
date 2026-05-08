@@ -2,24 +2,28 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class QCM extends Model
 {
-    protected $table = 'q_c_m_s';
-
+    use HasFactory;
+     protected $table = 'qcms'; 
     protected $fillable = [
+        'language_id',
         'title',
-        'category','status'
+        'category',
+        'time_limit',
+        'status',
+        'questions',
     ];
 
-    public function questions()
-    {
-        return $this->hasMany(Question::class ,'q_c_m_id');
-    }
+    protected $casts = [
+        'questions' => 'array',
+    ];
 
-    public function results()
+    public function language()
     {
-        return $this->hasMany(Result::class);
+        return $this->belongsTo(Language::class);
     }
 }

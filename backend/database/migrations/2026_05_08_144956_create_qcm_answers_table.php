@@ -11,17 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lessons', function (Blueprint $table) {
-    $table->id();
+        Schema::create('qcm_answers', function (Blueprint $table) {
+            $table->id();
+    $table->foreignId('qcm_attempt_id')->constrained()->onDelete('cascade');
+    $table->foreignId('question_id')->constrained()->onDelete('cascade');
 
-    $table->foreignId('course_id')
-          ->constrained()
-          ->onDelete('cascade');
+    $table->foreignId('option_id')->nullable()->constrained('options');
 
-    $table->string('title');
-    $table->longText('content');
     $table->timestamps();
-});
+        });
     }
 
     /**
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lessons');
+        Schema::dropIfExists('qcm_answers');
     }
 };

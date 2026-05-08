@@ -4,33 +4,88 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\QCM;
+use App\Models\Language;
 
-class QCMSeeder extends Seeder
+class QcmSeeder extends Seeder
 {
     public function run(): void
     {
-        $qcm = QCM::create([
-            'title' => 'HTML Basics',
-            'category' => 'HTML',
-            'status' => 'published'
+        // Get first language (or create fallback)
+        $language = Language::first();
+
+        if (!$language) {
+            $language = Language::create([
+                'name' => 'JavaScript'
+            ]);
+        }
+
+        QCM::create([
+            'language_id' => $language->id,
+            'title' => 'JavaScript Basics Quiz',
+            'category' => 'Développement Web',
+            'time_limit' => 15,
+            'status' => 'ACTIVE',
+            'questions' => [
+                [
+                    'question_text' => 'What is JavaScript?',
+                    'options' => [
+                        'Programming Language',
+                        'Database',
+                        'Operating System',
+                        'Server'
+                    ],
+                    'correct_answer_index' => 0
+                ],
+                [
+                    'question_text' => 'Which keyword declares a variable?',
+                    'options' => [
+                        'var',
+                        'echo',
+                        'print',
+                        'define'
+                    ],
+                    'correct_answer_index' => 0
+                ],
+                [
+                    'question_text' => 'Which company created JavaScript?',
+                    'options' => [
+                        'Microsoft',
+                        'Netscape',
+                        'Google',
+                        'Apple'
+                    ],
+                    'correct_answer_index' => 1
+                ]
+            ]
         ]);
 
-        $qcm->questions()->createMany([
-            [
-                'question' => 'What does HTML stand for?',
-                'option_a' => 'Hyper Text Markup Language',
-                'option_b' => 'Home Tool Markup Language',
-                'option_c' => 'Hyperlinks Text Mark Language',
-                'option_d' => 'None',
-                'correct_answer' => 'A'
-            ],
-            [
-                'question' => 'Which tag is for title?',
-                'option_a' => '<h1>',
-                'option_b' => '<title>',
-                'option_c' => '<head>',
-                'option_d' => '<meta>',
-                'correct_answer' => 'B'
+        QCM::create([
+            'language_id' => $language->id,
+            'title' => 'HTML Fundamentals',
+            'category' => 'Développement Web',
+            'time_limit' => 10,
+            'status' => 'ACTIVE',
+            'questions' => [
+                [
+                    'question_text' => 'What does HTML stand for?',
+                    'options' => [
+                        'Hyper Text Markup Language',
+                        'Home Tool Markup Language',
+                        'Hyperlinks Text Machine Language',
+                        'None'
+                    ],
+                    'correct_answer_index' => 0
+                ],
+                [
+                    'question_text' => 'Which tag is used for a paragraph?',
+                    'options' => [
+                        '<p>',
+                        '<h1>',
+                        '<div>',
+                        '<span>'
+                    ],
+                    'correct_answer_index' => 0
+                ]
             ]
         ]);
     }

@@ -138,3 +138,15 @@ const TPCard = ({ id, title, difficulty, desc, stats, icon, diffColor = "text-or
 );
 
 export default TPPage;
+
+
+
+
+
+
+
+
+
+
+
+

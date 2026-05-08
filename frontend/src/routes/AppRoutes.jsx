@@ -4,9 +4,11 @@ import { Routes, Route } from "react-router-dom";
 import LandingPage from "../pages/public/LandingPage";
 import AboutPage from "../pages/public/AboutPage";
 import NotebookPage from "../pages/public/NotebookPage";
+import CommandePage from "../pages/public/CommandePage";
+
 
 /* AUTH */
-import LoginPage from "../pages/auth/StudentLoginPage";
+import LoginPage from "../pages/auth/LoginPage";
 
 
 /* STUDENT */
@@ -16,6 +18,7 @@ import LanguageDetail from "../pages/student/LanguageDetail";
 import MesCertifications from "../pages/student/MesCertifications";
 import QCMIndexPage from "../pages/student/QCMIndexPage";
 import QCMPlayPage from "../pages/student/QCMPlayPage";
+import QCMResultsPage from "../pages/student/QCMResulsPage";
 import TPPage from "../pages/student/TPPage";
 import CodeLabPage from "../pages/student/CodeLabPage";
 import ProfilePage from "../pages/student/ProfilePage";
@@ -38,6 +41,7 @@ import TPManager from "../pages/admin/tp/TPManager";
 import AddTP from "../pages/admin/tp/AddTP";
 
 import UsersManager from "../pages/admin/users/UsersManager";
+import AddUser from "../pages/admin/users/AddUser";
 
 /* ROUTE GUARDS */
 import ProtectedRoute from "./ProtectedRoute";
@@ -50,7 +54,8 @@ export default function AppRoutes() {
       {/* 🌍 PUBLIC */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/about" element={<AboutPage />} />
-      <Route path="/notebook" element={<NotebookPage />} />
+      <Route path="/buy-notebook" element={<NotebookPage />} />
+      <Route path="/commande" element={<CommandePage />} />
 
       {/* 🔐 AUTH */}
       <Route path="/login" element={<LoginPage />} />
@@ -75,6 +80,7 @@ export default function AppRoutes() {
   <Route path="/student/certifications" element={<MesCertifications />} />
   <Route path="/student/qcm" element={<QCMIndexPage />} />
   <Route path="/student/qcm/:languageId" element={<QCMPlayPage />} />
+  <Route path="/student/qcm/results" element={<QCMResultsPage />} />
   <Route path="/student/profile" element={<ProfilePage />} />
 
 </Route>
@@ -101,6 +107,7 @@ export default function AppRoutes() {
 
         {/* Users */}
         <Route path="/admin/users" element={<UsersManager />} />
+        <Route path="/add/user" element={<AddUser/>} />
       </Route>
 
       {/* ❌ 404 fallback */}

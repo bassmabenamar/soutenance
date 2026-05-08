@@ -11,11 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('t_p_s', function (Blueprint $table) {
-    $table->id();
-    $table->string('title');
-    $table->longText('description');
-    $table->timestamps();
+        Schema::create('tps', function (Blueprint $table) {
+      $table->id();
+        $table->string('title');
+        $table->string('category');
+        $table->string('difficulty');
+        $table->text('description');
+        $table->longText('instructions')->nullable();
+        $table->integer('estimated_time');
+
+        $table->boolean('is_published')->default(false);
+        $table->boolean('auto_correction')->default(true);
+
+        $table->string('file_path')->nullable(); // PDF
+        $table->string('thumbnail')->nullable(); // image
+
+        $table->timestamps();
 });
     }
 

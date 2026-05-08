@@ -8,90 +8,81 @@ use Illuminate\Support\Facades\Storage;
 
 class CourseController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | 🎓 GET ALL COURSES (Used as Languages List)
-    |--------------------------------------------------------------------------
-    */
+    // =========================
+    // GET ALL COURSES (ADMIN)
+    // =========================
     public function index()
     {
-        $courses = Course::latest()->get();
-
-        return response()->json($courses); // ✅ IMPORTANT (no "courses" wrapper)
+        return response()->json([
+            'courses' => Course::with('language')->get()
+        ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 🎯 GET COURSES BY CATEGORY (HTML, CSS, JS...)
-    |--------------------------------------------------------------------------
-    */
-    public function byCategory($category)
+    // =========================
+    // GET COURSES BY LANGUAGE (FRONTEND)
+    // =========================
+    public function byLanguage($languageId)
     {
-        $courses = Course::where('category', $category)->latest()->get();
+        $courses = Course::where('language_id', $languageId)->get();
 
-        return response()->json($courses);
+        return response()->json([
+            'courses' => $courses
+        ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | 📄 GET SINGLE COURSE (PDF DETAIL)
-    |--------------------------------------------------------------------------
-    */
+    // =========================
+    // SHOW SINGLE COURSE (PDF VIEWER)
+    // =========================
     public function show($id)
     {
-        $course = Course::findOrFail($id);
+        $course = Course::find($id);
+
+        if (!$course) {
+            return response()->json([
+                'message' => 'Course not found'
+            ], 404);
+        }
 
         return response()->json($course);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | ⬆️ UPLOAD COURSE (ADMIN)
-    |--------------------------------------------------------------------------
-    */
-    public function upload(Request $request)
+    // =========================
+    // STORE COURSE (UPLOAD PDF)
+    // =========================
+    public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|string',
+            'title' => 'required|string',
+            'language_id' => 'required|exists:languages,id',
             'level' => 'required|string',
-            'description' => 'nullable|string',
-            'file' => 'required|file|mimes:pdf|max:102400'
+            'file' => 'required|mimes:pdf|max:20480',
         ]);
 
-        // store file
         $path = $request->file('file')->store('courses', 'public');
 
-        // file size
-        $size = $request->file('file')->getSize();
-        $fileSize = round($size / 1024 / 1024, 2) . ' MB';
-
-        // create course
         $course = Course::create([
             'title' => $request->title,
-            'category' => $request->category,
+            'language_id' => $request->language_id,
             'level' => $request->level,
             'description' => $request->description,
             'file_path' => $path,
-            'file_size' => $fileSize
+            'category' => $request->category,
         ]);
 
         return response()->json([
-            'message' => 'Course uploaded successfully',
+            'message' => 'Course created successfully',
             'course' => $course
-        ], 201);
+        ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | ❌ DELETE COURSE
-    |--------------------------------------------------------------------------
-    */
+    // =========================
+    // DELETE COURSE
+    // =========================
     public function destroy($id)
     {
         $course = Course::findOrFail($id);
 
-        if ($course->file_path && Storage::disk('public')->exists($course->file_path)) {
+        if ($course->file_path) {
             Storage::disk('public')->delete($course->file_path);
         }
 
@@ -101,34 +92,4 @@ class CourseController extends Controller
             'message' => 'Course deleted successfully'
         ]);
     }
-    public function languages()
-{
-    $languages = Course::select('category')
-        ->distinct()
-        ->get()
-        ->map(function ($item) {
-            return [
-                'id' => strtolower($item->category),
-                'title' => $item->category,
-                'subtitle' => 'Formation complète',
-                'description' => 'Apprenez ' . $item->category . ' avec des cours pratiques et PDF.',
-                'level' => 'Tous niveaux',
-                'icon_name' => $this->getIcon($item->category),
-                'color' => 'from-orange-400 to-orange-600',
-                'stats' => 'Modules disponibles'
-            ];
-        });
-
-    return response()->json($languages);
-}
-private function getIcon($category)
-{
-    return match(strtolower($category)) {
-        'html' => 'Globe',
-        'css' => 'Layout',
-        'javascript' => 'Zap',
-        'bootstrap' => 'Box',
-        default => 'Globe'
-    };
-}
 }

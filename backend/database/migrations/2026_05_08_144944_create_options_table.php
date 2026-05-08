@@ -11,13 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-      Schema::create('q_c_m_s', function (Blueprint $table) {
+     
+           Schema::create('options', function (Blueprint $table) {
     $table->id();
-    $table->string('title');
-    $table->string('category');
-    $table->string('status')->default('draft');
+    $table->foreignId('question_id')->constrained()->onDelete('cascade');
+
+    $table->string('option_text');
+    $table->boolean('is_correct')->default(false);
+
     $table->timestamps();
-});
+
+        });
     }
 
     /**
@@ -25,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('q_c_m_s');
+        Schema::dropIfExists('options');
     }
 };

@@ -76,7 +76,7 @@ useEffect(() => {
                 key={lang.id}
                 {...lang}
                 // Redirige vers le quiz spécifique : /student/qcm/html
-                onClick={() => navigate(`/student/qcm/${lang.title}`)} 
+                onClick={() => navigate(`/student/qcm/${lang.id}`)} 
               />
             ))}
           </div>
@@ -86,7 +86,13 @@ useEffect(() => {
   );
 };
 
-const QuizLanguageCard = ({ title, count, icon_name, color, popular, onClick }) => {
+const QuizLanguageCard = ({
+  title,
+  count = 0,
+  icon_name,
+  color = "bg-orange-500", // default
+  onClick
+}) => {
   const IconComponent = ICON_MAP[icon_name] || Globe;
 
   return (
@@ -98,7 +104,7 @@ const QuizLanguageCard = ({ title, count, icon_name, color, popular, onClick }) 
       
       <div className="flex justify-between items-start mb-8 relative z-10">
         <div className="p-4 bg-slate-50 rounded-2xl shadow-inner group-hover:bg-white transition-colors">
-          <IconComponent size={24} className={color.replace('bg-', 'text-')} />
+          <IconComponent size={24} className={color.replace('bg-', 'text-') || 'text-slate-500'} />
         </div>
         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 px-4 py-2 rounded-full">
           {count} Questions

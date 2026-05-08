@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import API from "../../services/api";
 
-const StudentLoginPage = () => {
+const LoginPage = () => {
   const [accessCode, setAccessCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -135,4 +135,4 @@ const StudentLoginPage = () => {
   );
 };
 
-export default StudentLoginPage;
+export default LoginPage;

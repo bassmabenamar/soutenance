@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Device extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
-        'device_id'
+        'device_name',
+        'ip_address',
+        'platform'
     ];
 
     public function user()

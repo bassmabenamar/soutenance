@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('books', function (Blueprint $table) {
-    $table->id();
-    $table->string('title');
-    $table->string('file');
-    $table->foreignId('language_id')
-      ->constrained()
-      ->onDelete('cascade');
-    $table->timestamps();
-});
+    
+    Schema::table('qcms', function (Blueprint $table) {
+        $table->string('category')->nullable();
+    });
+
     }
 
     /**
@@ -27,6 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('books');
+        Schema::table('qcms', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -14,14 +14,14 @@ return new class extends Migration
 {
     Schema::create('courses', function (Blueprint $table) {
         $table->id();
-        $table->string('title');
-        $table->foreignId('language_id')
-      ->constrained()
-      ->onDelete('cascade');
-        $table->string('level')->default('Débutant'); // Débutant, Intermédiaire, etc.
-        $table->text('description')->nullable();
-        $table->string('file_path'); // Chemin vers le fichier PDF sur le serveur
-        $table->string('file_size')->nullable(); // Ex: "2.4 MB"
+    $table->foreignId('language_id')->constrained()->onDelete('cascade');
+
+    $table->string('title');
+    $table->string('category')->nullable(); 
+    $table->text('description')->nullable();
+    $table->string('level')->default('beginner');
+    $table->string('file_path')->nullable();
+
         $table->timestamps();
     });
 

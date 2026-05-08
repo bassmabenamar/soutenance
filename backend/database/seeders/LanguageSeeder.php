@@ -9,22 +9,22 @@ class LanguageSeeder extends Seeder
 {
     public function run(): void
     {
-        Language::create([
-            'title' => 'HTML',
-            'icon_name' => 'code',
-            'color' => '#F97316'
-        ]);
-
-        Language::create([
-            'title' => 'CSS',
-            'icon_name' => 'palette',
-            'color' => '#3B82F6'
-        ]);
-
-        Language::create([
-            'title' => 'JavaScript',
-            'icon_name' => 'zap',
-            'color' => '#FACC15'
+        Language::insert([
+            [
+                'title' => 'HTML',
+                'icon_name' => 'Globe',
+                'color' => 'bg-orange-500'
+            ],
+            [
+                'title' => 'CSS',
+                'icon_name' => 'Palette',
+                'color' => 'bg-blue-500'
+            ],
+            [
+                'title' => 'JavaScript',
+                'icon_name' => 'Code',
+                'color' => 'bg-yellow-500'
+            ]
         ]);
     }
 }
