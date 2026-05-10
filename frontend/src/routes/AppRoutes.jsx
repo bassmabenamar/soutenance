@@ -20,6 +20,7 @@ import QCMIndexPage from "../pages/student/QCMIndexPage";
 import QCMPlayPage from "../pages/student/QCMPlayPage";
 import QCMResultsPage from "../pages/student/QCMResulsPage";
 import TPPage from "../pages/student/TPPage";
+import TPDetail from "../pages/student/TPDetail";
 import CodeLabPage from "../pages/student/CodeLabPage";
 import ProfilePage from "../pages/student/ProfilePage";
 import LanguagePage from "../pages/student/LanguagePage";
@@ -46,6 +47,7 @@ import AddUser from "../pages/admin/users/AddUser";
 /* ROUTE GUARDS */
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
+
 
 export default function AppRoutes() {
   return (
@@ -81,6 +83,10 @@ export default function AppRoutes() {
   <Route path="/student/qcm" element={<QCMIndexPage />} />
   <Route path="/student/qcm/:languageId" element={<QCMPlayPage />} />
   <Route path="/student/qcm/results" element={<QCMResultsPage />} />
+
+  <Route path="/student/tps" element={<TPPage />} />
+  <Route path="/student/tps/:tpId" element={<TPDetail/>} />
+
   <Route path="/student/profile" element={<ProfilePage />} />
 
 </Route>

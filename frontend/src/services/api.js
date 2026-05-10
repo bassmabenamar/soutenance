@@ -37,4 +37,29 @@ API.interceptors.response.use(
   }
 );
 
+export const tpService = {
+
+  // GET ALL TPs
+  getAllTPs: async (category = "") => {
+
+    const url = category
+      ? `/admin/tp?category=${category}`
+      : "/admin/tp";
+
+    const response = await API.get(url);
+
+    return response.data;
+  },
+
+  // GET ONE TP
+getOneTP: async (id) => {
+  const response = await API.get(`/admin/tp/${id}`);
+  return response.data;
+},
+
+  // START TP
+  startTP: async (id) => {
+    return true;
+  }
+};
 export default API;

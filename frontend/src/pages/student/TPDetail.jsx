@@ -1,37 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, Minus, Plus, Maximize2, 
-  Download, Search, Loader2, AlertCircle, ArrowLeft
+  Download, Loader2, AlertCircle
 } from 'lucide-react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import Sidebar from "../../components/layout/SidebarStudent";
-import API from "../../services/api";
+import { tpService } from "../../services/api";
 
-const LanguageDetail = () => {
-  const { languageId } = useParams();
+const TPDetail = () => {
+  const { tpId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const courseId = location.state?.courseId;
+  
+  // Use tpId from URL params or navigation state
+  const idToFetch =tpId;
 
-  const [course, setCourse] = useState(null);
+  const [tp, setTp] = useState(null);
   const [loading, setLoading] = useState(true);
   const [zoom, setZoom] = useState(100);
 
   useEffect(() => {
-    const fetchCourseDetails = async () => {
-      try {
-        // On récupère les détails du cours spécifique
-        const res = await API.get(`/courses/${courseId}`);
-        setCourse(res.data);
-      } catch (err) {
-        console.error("Erreur de chargement du PDF:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchTPDetails = async () => {
+    try {
+      setLoading(true);
 
-    if (courseId) fetchCourseDetails();
-  }, [courseId]);
+      console.log("TP ID:", tpId);
+
+      const res = await tpService.getOneTP(tpId);
+
+      console.log("TP RESPONSE:", res);
+
+      setTp(res);
+    } catch (err) {
+      console.error("Erreur:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (tpId) fetchTPDetails();
+}, [tpId]);
 
   if (loading) return (
     <div className="flex h-screen items-center justify-center bg-[#f8fafc]">
@@ -39,10 +47,10 @@ const LanguageDetail = () => {
     </div>
   );
 
-  if (!course) return (
+  if (!tp) return (
     <div className="flex h-screen flex-col items-center justify-center bg-[#f8fafc] text-slate-400">
       <AlertCircle size={48} className="mb-4" />
-      <p className="font-bold">Cours introuvable ou ID manquant.</p>
+      <p className="font-bold">Travail Pratique introuvable.</p>
       <button onClick={() => navigate(-1)} className="mt-4 text-[#F97316] font-black">Retour</button>
     </div>
   );
@@ -56,7 +64,7 @@ const LanguageDetail = () => {
 
       <main className="flex-1 flex flex-col overflow-hidden">
         
-        {/* PDF Top Toolbar - Style CodeLink */}
+        {/* --- Toolbar Style CodeLink --- */}
         <header className="h-14 bg-[#F97316] flex items-center justify-between px-6 shrink-0 text-white shadow-lg z-10">
           <div className="flex items-center gap-4">
             <button 
@@ -67,10 +75,10 @@ const LanguageDetail = () => {
             </button>
             <div className="flex flex-col">
               <h3 className="text-xs font-black leading-tight truncate max-w-md uppercase tracking-tighter">
-                {course.title}.pdf
+                TP-{tp.id || '00'}: {tp.title}.pdf
               </h3>
               <p className="text-[9px] font-bold opacity-70 uppercase tracking-widest">
-                {course.category} — Contenu Sécurisé
+                {tp.category} — Énoncé Officiel
               </p>
             </div>
           </div>
@@ -94,41 +102,56 @@ const LanguageDetail = () => {
           </div>
         </header>
 
-        {/* --- PDF VIEWER --- */}
+        {/* --- CONTENT VIEWER --- */}
         <div className="flex-1 overflow-y-auto bg-slate-200 p-4 md:p-8 flex justify-center">
           <div 
             className="w-full max-w-5xl bg-white shadow-2xl min-h-screen relative transition-all duration-300 origin-top"
             style={{ transform: `scale(${zoom / 100})`, width: `${zoom}%` }}
           >
-            {/* Si vous avez un fichier PDF réel, utilisez une iframe ou un viewer */}
-            {course.file_path ? (
-  <iframe
-    src={`http://localhost:8000/storage/${course.file_path}#toolbar=0`}
-    className="w-full h-full min-h-[1200px]"
-    title={course.title}
-  />
-) : (
-              /* Fallback style PDF si pas de fichier */
+            {/* If TP has a PDF file from backend */}
+            {tp.file_path ? (
+              <iframe
+                src={`http://localhost:8000/storage/${tp.file_path}#toolbar=0`}
+                className="w-full h-full min-h-[1200px] border-none"
+                title={tp.title}
+              />
+            ) : (
+              /* Fallback: Manual Design for TP description if no PDF exists */
               <div className="p-16">
                  <span className="bg-[#F97316] text-white text-[10px] font-black px-4 py-1 rounded-full mb-6 uppercase tracking-widest inline-block">
-                  Module {course.module_number || '01'}
+                  Challenge {tp.difficulty || 'Niveau 1'}
                 </span>
                 <h2 className="text-5xl font-black text-slate-800 leading-tight mb-8">
-                  {course.title}
+                  Instructions: {tp.title}
                 </h2>
                 <div className="w-20 h-1.5 bg-[#F97316] rounded-full mb-12"></div>
-                <p className="text-slate-500 leading-relaxed text-xl mb-8">
-                  {course.description}
-                </p>
-                <div className="p-8 bg-slate-50 border border-slate-100 rounded-[32px] text-center italic text-slate-400">
-                  Le contenu détaillé de ce module est en cours de génération...
+                
+                <div className="prose prose-slate max-w-none">
+                  <p className="text-slate-500 leading-relaxed text-xl mb-8">
+                    {tp.description}
+                  </p>
+                  
+                  {/* Additional TP-specific details can go here */}
+                  <div className="mt-12 p-8 bg-slate-50 border border-slate-100 rounded-[32px]">
+                    <h4 className="text-slate-800 font-black uppercase text-sm mb-4 tracking-wider">Objectifs du TP</h4>
+                    <ul className="space-y-3 text-slate-500">
+                       <li className="flex gap-3 items-start font-medium">
+                         <div className="w-1.5 h-1.5 rounded-full bg-[#F97316] mt-2 shrink-0" />
+                         Mise en pratique des concepts théoriques vus en cours.
+                       </li>
+                       <li className="flex gap-3 items-start font-medium">
+                         <div className="w-1.5 h-1.5 rounded-full bg-[#F97316] mt-2 shrink-0" />
+                         Validation des acquis techniques par la production de code.
+                       </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Floating Protection Tag */}
+            {/* Floating Watermark */}
             <div className="absolute top-10 right-10 opacity-10 pointer-events-none select-none">
-                <h1 className="text-6xl font-black rotate-45 text-slate-900 uppercase">CodeLink Secure</h1>
+                <h1 className="text-6xl font-black rotate-45 text-slate-900 uppercase">CodeLink TP</h1>
             </div>
           </div>
         </div>
@@ -137,4 +160,4 @@ const LanguageDetail = () => {
   );
 };
 
-export default LanguageDetail;
+export default TPDetail;

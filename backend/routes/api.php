@@ -47,28 +47,29 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     /* ADMIN */
-    Route::prefix('admin')->group(function () {
+    /* ADMIN */
+Route::prefix('admin')->group(function () {
 
-        Route::get('/stats', [AdminController::class, 'stats']);
+    Route::get('/stats', [AdminController::class, 'stats']);
 
-        Route::get('/users', [UserController::class, 'index']);
-        Route::post('/users/store', [UserController::class, 'store']);
-        Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users/store', [UserController::class, 'store']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
-        Route::get('/courses', [CourseController::class, 'index']);
-        Route::post('/courses/upload', [CourseController::class, 'store']);
-        Route::delete('/courses/{id}', [CourseController::class, 'destroy']);
+    // COURSES
+    Route::get('/courses', [CourseController::class, 'index']);
+    Route::post('/courses/upload', [CourseController::class, 'store']);
+    Route::delete('/courses/{id}', [CourseController::class, 'destroy']);
 
-        Route::get('/qcm', [QcmController::class, 'index']);
-        Route::post('/qcm/store', [QcmController::class, 'store']);
-        Route::delete('/qcm/{id}', [QcmController::class, 'destroy']);
-    });
+    // QCM
+    Route::get('/qcm', [QcmController::class, 'index']);
+    Route::post('/qcm/store', [QcmController::class, 'store']);
+    Route::delete('/qcm/{id}', [QcmController::class, 'destroy']);
 
-    /* TP */
-    Route::prefix('admin/tp')->group(function () {
-        Route::get('/', [TPController::class, 'index']);
-        Route::post('/store', [TPController::class, 'store']);
-        Route::get('/{id}', [TPController::class, 'show']);
-        Route::delete('/{id}', [TPController::class, 'destroy']);
-    });
+    // TP
+    Route::get('/tp', [TPController::class, 'index']);
+    Route::post('/tp/store', [TPController::class, 'store']);
+    Route::get('/tp/{id}', [TPController::class, 'show']);
+    Route::delete('/tp/{id}', [TPController::class, 'destroy']);
+});
 });

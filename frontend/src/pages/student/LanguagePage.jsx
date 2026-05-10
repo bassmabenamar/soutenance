@@ -20,32 +20,27 @@ const LanguagePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const res = await API.get(`/courses/category/${languageId}`);
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
 
-        console.log("API RESPONSE:", res.data);
+      const res = await API.get(`/courses/category/${languageId}`);
 
-        // ✅ SAFE NORMALIZATION (prevents .map crash)
-        const data = res.data;
+      console.log("COURSES API:", res.data);
 
-        const safeCourses = Array.isArray(data?.courses)
-          ? data.courses
-          : Array.isArray(data)
-          ? data
-          : [];
+      setCourses(res.data.courses || []);
 
-        setCourses(safeCourses);
-      } catch (err) {
-        console.error("Erreur lors du chargement des cours:", err);
-        setCourses([]); // never undefined
-      } finally {
-        setLoading(false);
-      }
-    };
+    } catch (err) {
+      console.error("Erreur lors du chargement des cours:", err);
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchCourses();
-  }, [languageId]);
+  fetchCourses();
+}, [languageId]);
+
 
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans text-slate-700">

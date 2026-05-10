@@ -11,11 +11,11 @@ class Course extends Model
 
     protected $fillable = [
         'title',
-        'category',
-        'description',
-        'level',
         'language_id',
+        'level',
+        'description',
         'file_path',
+        'category'
     ];
 
     // =========================

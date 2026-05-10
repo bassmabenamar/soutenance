@@ -62,7 +62,7 @@ const LoginPage = () => {
       <header className="p-8">
         <Link to="/">
           <h1 className="text-[#F97316] text-xl font-black uppercase">
-            CodeBook Academy
+            CodeLink Academy
           </h1>
         </Link>
       </header>

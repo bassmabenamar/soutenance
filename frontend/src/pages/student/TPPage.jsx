@@ -1,115 +1,141 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, BookOpen, HelpCircle, Terminal, 
-  Code, User, Code2, Cpu, Database, ChevronRight, Layers
+  Code2, Cpu, Database, ChevronRight, Layers, Loader2 
 } from 'lucide-react';
 import Sidebar from "../../components/layout/SidebarStudent";
-
+import { tpService } from "../../services/api"; // Import our new service
+import { useNavigate } from 'react-router-dom';
 const TPPage = () => {
+  const [tps, setTps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState("Tous les TP");
+  const navigate= useNavigate();
+  const categories = [
+  "Tous les TP",
+  "HTML",
+  "CSS",
+  "JavaScript",
+
+];
+
+  // Mapping icons to string types coming from Backend
+  const iconMap = {
+    javascript: <Code2 size={18} className="text-orange-500" />,
+    react: <Layers size={18} className="text-purple-500" />,
+    python: <Cpu size={18} className="text-blue-500" />,
+    database: <Database size={18} className="text-orange-500" />
+  };
+
+  useEffect(() => {
+    fetchTPs();
+  }, [activeFilter]);
+
+  const fetchTPs = async () => {
+    try {
+      setLoading(true);
+      const categoryParam = activeFilter === "Tous les TP" ? "" : activeFilter;
+      const response = await tpService.getAllTPs(categoryParam);
+
+console.log("TP RESPONSE:", response);
+
+setTps(response.tps || []);
+    } catch (error) {
+      console.error("Erreur lors du chargement des TP:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStartTP = async (id) => {
+    try {
+      await tpService.startTP(id);
+      navigate(`/student/tps/${id}`);// Redirect to workspace
+    } catch (error) {
+      alert("Impossible de démarrer ce TP pour le moment.");
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-[#f8fafc] font-sans text-slate-700">
-      
-      {/* --- Sidebar (Branding: CodeBook Academy) --- */}
       <Sidebar 
-  brandName="CodeLink"
-  onLogout={() => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-  }}
-/>
-      {/* --- Main Content Area --- */}
+        brandName="CodeLink"
+        onLogout={() => {
+          localStorage.removeItem("token");
+          window.location.href = "/login";
+        }}
+      />
+      
       <main className="flex-1 p-12">
-        
-        {/* Header Section */}
         <header className="mb-12">
           <p className="text-[10px] font-black text-[#F97316] uppercase tracking-[0.2em] mb-2">Parcours d'apprentissage</p>
           <h2 className="text-4xl font-black text-slate-800 mb-4">Exercices Pratiques (TP)</h2>
           <p className="text-slate-400 font-medium max-w-2xl leading-relaxed">
-            Relevez des défis techniques pour valider vos compétences et gagner de l'expérience concrète sur des projets réels.
+            Relevez des défis techniques pour valider vos compétences et gagner de l'expérience concrète.
           </p>
         </header>
 
         {/* Filter Bar */}
         <div className="flex items-center gap-3 mb-10 overflow-x-auto pb-2">
-          <FilterButton label="Tous les TP" active />
-          <FilterButton label="JavaScript" />
-          <FilterButton label="React.js" />
-          <FilterButton label="Python" />
-          <FilterButton label="Base de données" />
+          {categories.map(cat => (
+            <FilterButton 
+              key={cat}
+              label={cat} 
+              active={activeFilter === cat} 
+              onClick={() => setActiveFilter(cat)}
+            />
+          ))}
         </div>
 
-        {/* TP Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          <TPCard 
-            id="01"
-            title="JS Loops & Logic"
-            difficulty="Débutant"
-            desc="Maîtrisez les structures itératives et la logique conditionnelle fondamentale en JavaScript moderne (ES6+)."
-            stats="+1.2k complétés"
-            icon={<Code2 size={18} className="text-orange-500" />}
-          />
-          <TPCard 
-            id="02"
-            title="Fetch API & Async"
-            difficulty="Intermédiaire"
-            diffColor="text-blue-500 bg-blue-50"
-            desc="Apprenez à consommer des API REST, gérer les promesses et le traitement asynchrone avec async/await."
-            stats="+850 complétés"
-            icon={<Cpu size={18} className="text-blue-500" />}
-          />
-          <TPCard 
-            id="03"
-            title="Architecture React"
-            difficulty="Avancé"
-            diffColor="text-purple-500 bg-purple-50"
-            desc="Mise en place d'une architecture robuste avec Context API et Custom Hooks pour des apps scalables."
-            stats="+420 complétés"
-            icon={<Layers size={18} className="text-purple-500" />}
-          />
-          <TPCard 
-            id="04"
-            title="JSON & Objets"
-            difficulty="Débutant"
-            desc="Manipulation des structures de données complexes et conversion JSON pour le stockage local."
-            isNew
-            icon={<Database size={18} className="text-orange-500" />}
-          />
-        </div>
+        {/* Loading State or Grid */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+            <Loader2 className="animate-spin mb-4" size={40} />
+            <p className="font-medium">Chargement de vos défis...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {tps.map((tp) => (
+              <TPCard 
+                key={tp.id}
+                id={tp.id || "00"}
+                title={tp.title}
+                difficulty={tp.difficulty}
+                diffColor={tp.difficultyColor} // Expecting "text-blue-500 bg-blue-50" from DB
+                desc={tp.description}
+                stats={`${tp.completedCount} complétés`}
+                icon={
+  iconMap[tp.category?.toLowerCase()] || <Code2 size={18} />
+}
+                isNew={tp.isNewTP}
+                onStart={() => handleStartTP(tp.id)}
+              />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
 };
 
-/* --- UI Sub-components --- */
+/* --- Updated Sub-components --- */
 
-const SidebarItem = ({ icon, label, active = false }) => (
-  <div className="relative group px-2">
-    {active && (
-      <div className="absolute right-[-16px] top-1/2 -translate-y-1/2 w-1 h-8 bg-[#F97316] rounded-l-full shadow-[0_0_10px_#F97316]" />
-    )}
-    <div className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl cursor-pointer transition-all ${
-      active ? 'bg-orange-50/70 text-[#F97316] font-bold' : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
-    }`}>
-      <span className={active ? 'text-[#F97316]' : 'text-slate-400'}>{icon}</span>
-      <span className="text-sm">{label}</span>
-    </div>
-  </div>
-);
-
-const FilterButton = ({ label, active = false }) => (
-  <button className={`px-6 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
-    active 
-      ? 'bg-[#F97316] text-white border-[#F97316] shadow-lg shadow-orange-200' 
-      : 'bg-white text-slate-400 border-slate-100 hover:border-slate-300'
-  }`}>
+const FilterButton = ({ label, active, onClick }) => (
+  <button 
+    onClick={onClick}
+    className={`px-6 py-2.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
+      active 
+        ? 'bg-[#F97316] text-white border-[#F97316] shadow-lg shadow-orange-200' 
+        : 'bg-white text-slate-400 border-slate-100 hover:border-slate-300'
+    }`}
+  >
     {label}
   </button>
 );
 
-const TPCard = ({ id, title, difficulty, desc, stats, icon, diffColor = "text-orange-500 bg-orange-50", isNew = false }) => (
+const TPCard = ({ id, title, difficulty, desc, stats, icon, diffColor, isNew, onStart }) => (
   <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all flex flex-col group h-full">
     <div className="flex justify-between items-start mb-6">
-      <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${diffColor}`}>
+      <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${diffColor || "text-orange-500 bg-orange-50"}`}>
         {difficulty}
       </div>
       <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">
@@ -130,23 +156,14 @@ const TPCard = ({ id, title, difficulty, desc, stats, icon, diffColor = "text-or
       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tight">
         {isNew ? "Nouveau TP disponible" : stats}
       </span>
-      <button className="bg-[#F97316] text-white px-6 py-3 rounded-xl font-bold text-xs shadow-lg shadow-orange-100 hover:bg-orange-600 transition-all flex items-center gap-2">
-        Commencer le TP <ChevronRight size={14} />
+      <button 
+        onClick={onStart}
+        className="bg-[#F97316] text-white px-6 py-3 rounded-xl font-bold text-xs shadow-lg shadow-orange-100 hover:bg-orange-600 transition-all flex items-center gap-2"
+      >
+        Commencer <ChevronRight size={14} />
       </button>
     </div>
   </div>
 );
 
 export default TPPage;
-
-
-
-
-
-
-
-
-
-
-
-

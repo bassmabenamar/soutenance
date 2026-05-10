@@ -8,6 +8,7 @@ import {
   Award,
   Settings,
   LogOut,
+  FileCode,
 } from "lucide-react";
 
 import API from "../../services/api"; // ✅ use your axios instance
@@ -19,6 +20,10 @@ const NAVIGATION_LINKS = [
   { to: "/student/dashboard", icon: LayoutDashboard, label: "Dashboard", role: "user" },
   { to: "/student/courses", icon: BookOpen, label: "Courses", role: "user" },
   { to: "/student/qcm", icon: HelpCircle, label: "Quizzes", role: "user" },
+
+  // ✅ ADD THIS
+  { to: "/student/tps", icon: FileCode, label: "TP", role: "user" },
+
   { to: "/student/codelab", icon: Terminal, label: "CodeLab", role: "user" },
   { to: "/student/certifications", icon: Award, label: "Certifications", role: "user" },
   { to: "/student/profile", icon: Settings, label: "Profile", role: "user" },

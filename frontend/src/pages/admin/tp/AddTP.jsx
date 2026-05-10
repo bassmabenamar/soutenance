@@ -62,29 +62,64 @@ const AddTP = () => {
 
   // ================= SUBMIT =================
   const handleSubmit = async () => {
-    if (!formData.title || !formData.description) {
-      return alert("Titre et description requis");
-    }
+  if (!formData.title || !formData.description) {
+    return alert("Titre et description requis");
+  }
 
+  try {
     setLoading(true);
 
     const data = new FormData();
 
-Object.keys(formData).forEach(key => {
-  let value = formData[key];
+    Object.keys(formData).forEach((key) => {
+      let value = formData[key];
 
-  // convert boolean → 0/1
-  if (typeof value === 'boolean') {
-    value = value ? 1 : 0;
+      // boolean → 0/1
+      if (typeof value === "boolean") {
+        value = value ? 1 : 0;
+      }
+
+      data.append(key, value);
+    });
+
+    // files
+    if (thumbnail) {
+      data.append("thumbnail", thumbnail);
+    }
+
+    if (tpFile) {
+      data.append("tp_file", tpFile);
+    }
+
+    // ✅ SEND REQUEST
+    const response = await API.post(
+      "/admin/tp/store",
+      data,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log(response.data);
+
+    alert("TP ajouté avec succès");
+
+    navigate("/admin/tp");
+
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error?.response?.data?.message ||
+      "Erreur lors de l'ajout du TP"
+    );
+
+  } finally {
+    setLoading(false);
   }
-
-  data.append(key, value);
-});
-
-if (thumbnail) data.append('thumbnail', thumbnail);
-if (tpFile) data.append('tp_file', tpFile);
-  };
-
+};
   // ================= UI =================
   return (
     <div className="flex min-h-screen bg-[#f8fafc]">

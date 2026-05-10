@@ -176,7 +176,8 @@ const AddPDF = () => {
                   <option value="">Sélectionner une langue</option>
                   <option value="1">HTML</option>
                   <option value="2">CSS</option>
-                  <option value="3">JavaScript</option>
+                  <option value="3">Bootstrap</option>
+                  <option value="4">JavaScript</option>
                 </select>
               </div>
 

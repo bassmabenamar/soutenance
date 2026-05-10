@@ -21,10 +21,15 @@ class LanguageSeeder extends Seeder
                 'color' => 'bg-blue-500'
             ],
             [
+                'title' => 'Bootstrap',
+                'icon_name' => 'Layout',
+                'color' => 'bg-purple-500'
+            ],
+            [
                 'title' => 'JavaScript',
                 'icon_name' => 'Code',
                 'color' => 'bg-yellow-500'
-            ]
+            ],
         ]);
     }
 }

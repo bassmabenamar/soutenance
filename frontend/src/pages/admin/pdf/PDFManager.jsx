@@ -34,19 +34,11 @@ const PDFManager = () => {
     try {
       setLoading(true);
 
-      const response = await API.get('/admin/courses');
+ const response = await API.get('/admin/courses');
 
-console.log(response);
 console.log(response.data);
 
-setPdfs(response.data);
-
-      // Laravel returns array directly
-      const data = Array.isArray(response.data)
-        ? response.data
-        : response.data.data || [];
-
-      setPdfs(data);
+setPdfs(response.data.courses || []);
 
     } catch (error) {
       console.error('Erreur fetch PDFs:', error);
