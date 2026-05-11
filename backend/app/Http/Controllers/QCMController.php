@@ -19,7 +19,7 @@ class QcmController extends Controller
         $languages = $qcms->map(function ($qcm) {
             return [
                 "id" => $qcm->language_id,
-                "title" => $qcm->language->name ?? "Unknown",
+                "title" => $qcm->language->title ?? "Unknown",
                 "icon_name" => "Globe",
                 "color" => "bg-orange-500",
                 "count" => is_array($qcm->questions) ? count($qcm->questions) : 0
@@ -68,20 +68,16 @@ class QcmController extends Controller
         $score = 0;
         $total = count($questions);
 
-        foreach ($questions as $index => $question) {
+       foreach ($questions as $index => $question) {
 
-    $qid = $index;
-
-    // correct answer index from database
-    $correctIndex = $question['correct_answer_index'];
+    // correct answer index from DB
+    $correctIndex = (int) $question['correct_answer_index'];
 
     // selected answer from frontend
-    $selectedAnswer = $answers[$qid] ?? null;
+    $selectedIndex = $answers[$index] ?? null;
 
-    // correct answer text
-    $correctAnswer = $question['options'][$correctIndex];
-
-    if ($selectedAnswer === $correctAnswer) {
+    // compare index with index
+    if ($selectedIndex !== null && (int)$selectedIndex === $correctIndex) {
         $score++;
     }
 }
@@ -101,4 +97,41 @@ class QcmController extends Controller
             'passed' => $passed
         ]);
     }
+    // =========================
+// ADMIN - GET ALL QCM
+// =========================
+public function index()
+{
+    return response()->json(QCM::all());
+}
+
+// =========================
+// ADMIN - CREATE QCM
+// =========================
+public function store(Request $request)
+{
+    $qcm = QCM::create([
+        'title' => $request->title,
+        'language_id' => $request->language_id,
+        'time_limit' => $request->time_limit,
+        'questions' => $request->questions
+    ]);
+
+    return response()->json([
+        'message' => 'QCM created successfully',
+        'data' => $qcm
+    ]);
+}
+
+// =========================
+// ADMIN - DELETE QCM
+// =========================
+public function destroy($id)
+{
+    QCM::findOrFail($id)->delete();
+
+    return response()->json([
+        'message' => 'QCM deleted successfully'
+    ]);
+}
 }

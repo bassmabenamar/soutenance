@@ -12,7 +12,7 @@ import LoginPage from "../pages/auth/LoginPage";
 
 
 /* STUDENT */
-import DashboardPage from "../pages/student/DashboardPage";
+//import DashboardPage from "../pages/student/DashboardPage";
 import CoursesPage from "../pages/student/CoursesPage";
 import LanguageDetail from "../pages/student/LanguageDetail";
 import MesCertifications from "../pages/student/MesCertifications";
@@ -77,7 +77,6 @@ export default function AppRoutes() {
   <Route path="/student/language/:languageId/details" element={<LanguageDetail />} />
 
   {/* OTHER */}
-  <Route path="/student/dashboard" element={<DashboardPage />} />
   <Route path="/student/codelab" element={<CodeLabPage />} />
   <Route path="/student/certifications" element={<MesCertifications />} />
   <Route path="/student/qcm" element={<QCMIndexPage />} />

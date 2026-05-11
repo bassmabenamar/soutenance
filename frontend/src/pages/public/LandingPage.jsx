@@ -1,193 +1,222 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  ArrowRight, PlayCircle, Layers, MousePointer2, 
-  Terminal, Globe, CheckCircle, Quote 
+import {
+  ArrowRight, PlayCircle, Layers, MousePointer2,
+  Terminal, Globe, Infinity, Cursor
 } from 'lucide-react';
+import notebookImg from '../../assets/notebook.jpg';
+import logoImg from '../../assets/codelink notebook.png';
+
 
 const CONTENT = {
   hero: {
     badge: "Nouveau : Masterclass Next.js 14",
-    title: { main: "Apprenez le Front-End", highlight: "Plus Vite" },
+    title: { main: "Apprenez le Front-End", highlight: "Plus Vite." },
     desc: "Maîtrisez l'art des applications web modernes. Notre plateforme immersive vous propulse du niveau débutant à expert avec des projets réels.",
     image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200"
   },
+  stats: [
+    { num: "12 000+", label: "apprenants actifs" },
+    { num: "200+", label: "heures de contenu" },
+    { num: "98%", label: "taux de satisfaction" }
+  ],
   features: [
-    { 
-      title: "Accès Illimité", 
-      desc: "Débloquez tous les cours, du Frontend au DevOps. De nouveaux contenus ajoutés chaque mois.", 
-      icon: <Layers className="text-orange-500" />,
-      colSpan: "md:col-span-8 bg-white" 
+    {
+      title: "Accès Illimité",
+      desc: "Débloquez tous les cours, du Frontend au DevOps. De nouveaux contenus ajoutés chaque mois.",
+      icon: <Layers size={20} className="text-[#e5522d]" />,
+      iconBg: "bg-[#fff3f0]",
+      colSpan: "col-span-1"
     },
-    { 
-      title: "Support 24/7", 
-      desc: "Ne restez jamais bloqué. Notre communauté et nos assistants IA sont là.", 
-      icon: <Globe className="text-white opacity-80" />,
-      colSpan: "md:col-span-4 bg-[#5063B0] text-white" 
+    {
+      title: "Support 24/7",
+      desc: "Ne restez jamais bloqué. Notre communauté et nos assistants IA sont disponibles à tout moment.",
+      icon: <Globe size={20} className="text-white opacity-80" />,
+      iconBg: "bg-white/20",
+      colSpan: "col-span-1",
+      accent: true
     },
-    { 
-      title: "Apprentissage Interactif", 
-      desc: "Votre navigateur devient votre éditeur. Pratiquez directement avec notre playground.", 
-      icon: <MousePointer2 className="text-orange-500" />,
-      colSpan: "md:col-span-4 bg-white" 
+    {
+      title: "Apprentissage Interactif",
+      desc: "Votre navigateur devient votre éditeur. Pratiquez directement avec notre playground intégré.",
+      icon: <MousePointer2 size={20} className="text-[#1754be]" />,
+      iconBg: "bg-[#eef3fc]",
+      colSpan: "col-span-1"
     },
-    { 
-      title: "LMS + QCM + TP", 
-      desc: "Une triade complète : cours structurés, quiz de validation et travaux pratiques.", 
-      icon: <Terminal className="text-blue-600" />,
-      colSpan: "md:col-span-8 bg-blue-50/50 border-blue-100" 
+    {
+      title: "LMS + QCM + TP",
+      desc: "Une triade complète : cours structurés, quiz de validation et travaux pratiques guidés.",
+      icon: <Terminal size={20} className="text-[#1754be]" />,
+      iconBg: "bg-[#dce9fb]",
+      colSpan: "col-span-1"
     }
   ],
   steps: [
-    { title: "Choisir", desc: "Sélectionnez le plan qui correspond à vos objectifs." },
-    { title: "Apprendre", desc: "Suivez les leçons et complétez les modules interactifs." },
-    { title: "Pratiquer", desc: "Travaillez sur des projets réels en conditions réelles." },
-    { title: "Décoller", desc: "Recevez votre certification et postulez aux meilleurs jobs." }
+    { title: "Choisir", desc: "Sélectionnez le plan qui correspond à vos objectifs personnels." },
+    { title: "Apprendre", desc: "Suivez les leçons et complétez les modules interactifs à votre rythme." },
+    { title: "Pratiquer", desc: "Travaillez sur des projets réels en conditions de production." },
+    { title: "Décoller", desc: "Recevez votre certification et postulez aux meilleurs postes." }
   ],
   techStack: [
-    { label: "HTML5 Mastery", color: "bg-orange-50 text-orange-600" },
-    { label: "CSS3 & Layouts", color: "bg-blue-50 text-blue-600" },
-    { label: "Bootstrap 5", color: "bg-purple-50 text-purple-600" },
-    { label: "JavaScript ES6+", color: "bg-yellow-50 text-yellow-700" }
+    { label: "HTML5 Mastery", color: "bg-[#fff3f0] text-[#b83c19] border-[#f5bfb0]" },
+    { label: "CSS3 & Layouts", color: "bg-[#eef3fc] text-[#1245a0] border-[#b8cef5]" },
+    { label: "Bootstrap 5", color: "bg-[#f0eefe] text-[#5040b0] border-[#ccc8f0]" },
+    { label: "JavaScript ES6+", color: "bg-[#fffbeb] text-[#8c6000] border-[#f5d878]" }
   ]
 };
 
 const LandingPage = () => {
   return (
     <div className="min-h-screen bg-white font-sans text-slate-800">
-      
+
       {/* --- Navigation --- */}
-      <nav className="h-20 flex items-center justify-between px-6 lg:px-8 border-b border-slate-50 sticky top-0 bg-white/90 backdrop-blur-md z-50">
-        <div className="flex items-center gap-8">
-          <Link to="/" className="text-[#F97316] text-[30px] font-black uppercase tracking-tighter">
-            CodeLink Academy
-          </Link>
-        </div>
-        <div className="flex items-center gap-4">
-           <Link to="/login" className="bg-[#F97316] text-white px-8 py-2.5 rounded-xl text-sm font-black shadow-lg shadow-orange-100 transition-transform hover:scale-105">Connexion</Link>
-        </div>
+      <nav className="h-[68px] flex items-center justify-between px-6 lg:px-10 border-b border-slate-100 sticky top-0 bg-white/90 backdrop-blur-md z-50">
+        <Link to="/" className="flex items-center gap-2 text-[#1754be] text-[18px] font-medium tracking-tight">
+          <img
+            src={logoImg}
+            alt="logo"
+            className="w-7 h-7 object-contain"
+          />
+          Codelink <span className="text-[#e5522d]">&nbsp;Notebook</span>
+        </Link>
+        <Link
+          to="/login"
+          className="bg-[#1754be] text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-[#1245a0] transition-colors"
+        >
+          Connexion
+        </Link>
       </nav>
 
-      {/* --- Section Hero --- */}
-      <section className="px-6 lg:px-8 py-20 max-w-[1400px] mx-auto grid lg:grid-cols-2 gap-12 items-center">
-        <div className="space-y-8">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#F97316] animate-pulse"></span>
-            <span className="text-[10px] font-black text-[#F97316] uppercase tracking-widest">{CONTENT.hero.badge}</span>
-          </div>
-          <h2 className="text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] tracking-tight">
-            {CONTENT.hero.title.main} <br />
-            <span className="text-[#F97316]">{CONTENT.hero.title.highlight}</span>
-          </h2>
-          <p className="text-lg text-slate-400 leading-relaxed font-medium max-w-lg">
+      {/* --- Hero --- */}
+      <section className="px-6 lg:px-10 py-20 max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          
+
+          <h1 className="text-5xl lg:text-[56px] font-medium text-[#0d1b3e] leading-[1.08] tracking-tight mb-5">
+            {CONTENT.hero.title.main}<br />
+            <span className="text-[#e5522d]">{CONTENT.hero.title.highlight}</span>
+          </h1>
+
+          <p className="text-[16px] text-slate-500 leading-relaxed max-w-md mb-9">
             {CONTENT.hero.desc}
           </p>
-          <div className="flex flex-wrap gap-4 pt-4">
-            <button className="bg-[#F97316] text-white px-8 py-4 rounded-2xl font-black text-lg shadow-xl shadow-orange-200 hover:scale-105 transition-all">
-              Essai Gratuit
+
+          <div className="flex flex-wrap gap-3">
+            <button className="bg-[#e5522d] text-white px-7 py-3 rounded-lg text-sm font-medium hover:bg-[#cc4522] transition-all hover:-translate-y-0.5">
+              Essai gratuit
             </button>
-            <Link to="/buy-notebook" className="text-slate-700 px-8 py-4 rounded-2xl font-black text-lg flex items-center gap-3 border-2 border-slate-100 hover:bg-slate-50 transition-all">
-              <PlayCircle size={22} className="text-blue-500" /> Acheter Nodebook
+            <Link
+              to="/buy-notebook"
+              className="flex items-center gap-2 text-[#1754be] px-6 py-3 rounded-lg text-sm font-medium border border-[#1754be] hover:bg-[#eef3fc] transition-colors"
+            >
+              <PlayCircle size={16} /> Acheter Notebook
             </Link>
           </div>
         </div>
-        
-        <div className="relative">
-          <div className="absolute -inset-10 bg-orange-100/50 rounded-full blur-3xl opacity-60"></div>
-          <div className="relative bg-[#1E293B] rounded-[40px] p-2 shadow-2xl overflow-hidden border-8 border-white">
-            <img 
-              src={CONTENT.hero.image} 
-              className="rounded-[32px] opacity-90 grayscale-[20%] hover:grayscale-0 transition-all duration-700 w-full object-cover" 
-              alt="Aperçu de l'IDE"
-            />
+
+        {/* Hero visual */}
+<div className="relative flex items-center justify-center bg-gradient-to-br from-[#f0f4ff] to-[#e8f0fe] border border-[#c7d5f5] rounded-2xl p-8 min-h-[420px]">
+  
+  {/* Glow effect derrière l'image */}
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="w-64 h-64 bg-[#1754be]/10 rounded-full blur-3xl"></div>
+  </div>
+
+  {/* Image notebook */}
+  <img
+    src={notebookImg}
+    alt="Codelink Notebook"
+    className="relative z-10 w-full max-w-[380px] object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
+  />
+</div>
+      </section>
+
+      {/* --- Stats bar --- */}
+      <div className="bg-[#1754be] grid grid-cols-3">
+        {CONTENT.stats.map((s, i) => (
+          <div key={i} className={`text-center py-8 ${i < 2 ? 'border-r border-white/15' : ''}`}>
+            <div className="text-3xl font-medium text-white tracking-tight">{s.num}</div>
+            <div className="text-xs text-white/60 mt-1">{s.label}</div>
           </div>
+        ))}
+      </div>
+
+      {/* --- Features --- */}
+      <section className="px-6 lg:px-10 py-20 max-w-[1200px] mx-auto">
+        <div className="text-xs font-medium tracking-[0.1em] text-[#e5522d] uppercase mb-3">Fonctionnalités</div>
+        <h2 className="text-4xl font-medium text-[#0d1b3e] tracking-tight mb-3">Une expérience d'apprentissage unique</h2>
+        <p className="text-slate-500 text-[15px] mb-12 max-w-lg">Une méthodologie intégrée aux outils professionnels, conçue pour des résultats concrets.</p>
+
+        <div className="grid grid-cols-2 gap-4">
+          {CONTENT.features.map((feat, idx) => (
+            <FeatureCard key={idx} {...feat} />
+          ))}
         </div>
       </section>
 
-      {/* --- Section Experience --- */}
-      <section className="px-6 lg:px-8 py-24 bg-[#f8fafc]">
-        <div className="max-w-[1400px] mx-auto">
-          <div className="text-center mb-16 space-y-4">
-            <h3 className="text-4xl font-black text-slate-900">Une Expérience d'Apprentissage Unique</h3>
-            <p className="text-slate-400 max-w-2xl mx-auto font-medium">Une méthodologie intégrée aux outils professionnels.</p>
-          </div>
+      {/* --- Steps --- */}
+      <section className="bg-[#f8faff] px-6 lg:px-10 py-20">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-xs font-medium tracking-[0.1em] text-[#e5522d] uppercase mb-3">Parcours</div>
+          <h2 className="text-4xl font-medium text-[#0d1b3e] tracking-tight mb-12">Votre parcours de réussite</h2>
 
-          <div className="grid md:grid-cols-12 gap-6">
-            {CONTENT.features.map((feat, idx) => (
-              <FeatureBlock 
-                key={idx}
-                className={feat.colSpan}
-                icon={feat.icon}
-                title={feat.title}
-                desc={feat.desc}
-              />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+            {CONTENT.steps.map((step, idx) => (
+              <Step key={idx} number={idx + 1} title={step.title} desc={step.desc} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* --- Timeline Steps --- */}
-      <section className="px-6 lg:px-8 py-32 max-w-[1400px] mx-auto">
-        <div className="mb-20 text-center lg:text-left">
-          <h3 className="text-4xl font-black text-slate-900 mb-4">Votre Parcours de Réussite</h3>
-          <div className="w-24 h-1.5 bg-orange-100 rounded-full mt-6 overflow-hidden mx-auto lg:mx-0">
-             <div className="w-1/2 h-full bg-[#F97316]"></div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-12 relative">
-           {CONTENT.steps.map((step, idx) => (
-             <Step key={idx} number={idx + 1} title={step.title} desc={step.desc} />
-           ))}
-        </div>
-      </section>
-
       {/* --- Footer --- */}
-      <footer className="bg-[#1E293B] text-white px-6 lg:px-8 py-20">
-        <div className="max-w-[1400px] mx-auto grid md:grid-cols-4 gap-16">
-          <div className="col-span-2 space-y-6">
-            <h4 className="text-[#F97316] text-xl font-black uppercase">CodeLink Academy</h4>
-            <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
-              Former la prochaine génération d'ingénieurs logiciels avec passion.
+      <footer className="bg-[#0d1b3e] text-white px-6 lg:px-10 pt-16 pb-8">
+        <div className="max-w-[1200px] mx-auto grid md:grid-cols-3 gap-12 mb-12">
+          <div>
+            <div className="text-[#e5522d] text-[17px] font-medium mb-3">Codelink Notebook</div>
+            <p className="text-white/40 text-sm leading-relaxed max-w-[260px]">
+              Former la prochaine génération d'ingénieurs logiciels avec passion et méthode.
             </p>
           </div>
-          <FooterLinks title="Support" links={['Facturation', 'Centre d\'aide', 'Sécurité']} />
-          <FooterLinks title="Légal" links={['Mentions Légales', 'Confidentialité', 'Cookies']} />
+          <FooterLinks title="Support" links={["Facturation", "Centre d'aide", "Sécurité"]} />
+          <FooterLinks title="Légal" links={["Mentions légales", "Confidentialité", "Cookies"]} />
+        </div>
+        <div className="max-w-[1200px] mx-auto border-t border-white/10 pt-6 flex justify-between items-center">
+          <span className="text-white/30 text-xs">© 2025 Codelink Notebook. Tous droits réservés.</span>
+          <span className="text-[#1754be] text-xs">Made with ♥ for devs</span>
         </div>
       </footer>
     </div>
   );
 };
 
-// Sous-composants réutilisables
-const FeatureBlock = ({ className, icon, title, desc }) => (
-  <div className={`p-8 lg:p-10 rounded-[32px] border border-slate-50 shadow-sm space-y-6 transition-all hover:shadow-md ${className}`}>
-    <div className="w-12 h-12 flex items-center justify-center bg-slate-50/10 rounded-2xl shadow-inner">{icon}</div>
-    <div className="space-y-2">
-      <h4 className="text-xl font-black">{title}</h4>
-      <p className="text-sm opacity-80 leading-relaxed font-medium">{desc}</p>
+const FeatureCard = ({ title, desc, icon, iconBg, accent }) => (
+  <div className={`p-7 rounded-2xl border transition-all hover:shadow-sm ${accent ? 'bg-[#1754be] border-[#1754be]' : 'bg-white border-slate-100 hover:border-slate-200'}`}>
+    <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-5 ${iconBg}`}>
+      {icon}
     </div>
+    <h3 className={`text-[15px] font-medium mb-2 ${accent ? 'text-white' : 'text-[#0d1b3e]'}`}>{title}</h3>
+    <p className={`text-[13px] leading-relaxed ${accent ? 'text-white/65' : 'text-slate-500'}`}>{desc}</p>
   </div>
 );
 
 const Step = ({ number, title, desc }) => (
-  <div className="space-y-6 group text-center lg:text-left">
-    <div className="w-14 h-14 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-xl font-black text-slate-300 group-hover:bg-[#F97316] group-hover:text-white transition-all duration-500 mx-auto lg:mx-0">
+  <div className="group text-center">
+    <div className="w-10 h-10 rounded-full border border-slate-200 bg-white flex items-center justify-center text-[13px] font-medium text-[#1754be] mx-auto mb-5 transition-all group-hover:bg-[#e5522d] group-hover:text-white group-hover:border-[#e5522d]">
       {number}
     </div>
-    <div>
-      <h4 className="font-black text-slate-800 mb-2 uppercase text-sm tracking-widest">{title}</h4>
-      <p className="text-sm text-slate-400 font-medium leading-relaxed">{desc}</p>
-    </div>
+    <h4 className="text-[11px] font-medium text-[#0d1b3e] uppercase tracking-widest mb-2">{title}</h4>
+    <p className="text-[13px] text-slate-500 leading-relaxed">{desc}</p>
   </div>
 );
 
 const FooterLinks = ({ title, links }) => (
-  <div className="space-y-6">
-    <h5 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{title}</h5>
-    <ul className="space-y-4">
-      {links.map(link => (
-        <li key={link} className="text-sm font-bold text-slate-400 hover:text-[#F97316] cursor-pointer transition-colors">{link}</li>
+  <div>
+    <h5 className="text-[10px] font-medium uppercase tracking-[0.15em] text-white/35 mb-5">{title}</h5>
+    <ul className="space-y-3">
+      {links.map((link) => (
+        <li key={link}>
+          <a className="text-[13px] text-white/55 hover:text-[#e5522d] cursor-pointer transition-colors">{link}</a>
+        </li>
       ))}
     </ul>
   </div>

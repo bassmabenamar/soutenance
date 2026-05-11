@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   UserPlus, Search, MoreHorizontal, 
   TrendingUp, Zap, GraduationCap, Ban, 
-  Loader2, CheckCircle, XCircle
+  Loader2, Users, ShieldCheck, ShieldOff
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,57 +14,39 @@ const UsersManager = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const navigete=useNavigate();
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
-    total: 0,
-    active: 0,
-    completion: 0,
-    blocked: 0
+    total: 0, active: 0, completion: 0, blocked: 0
   });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  useEffect(() => { fetchUsers(); }, []);
 
   const fetchUsers = async () => {
-  setLoading(true);
-  try {
-    const response = await API.get('/admin/users');
+    setLoading(true);
+    try {
+      const response = await API.get('/admin/users');
+      const users = response.data?.users || response.data?.data?.users || [];
+      const summary = response.data?.summary || response.data?.data?.summary || {
+        total: 0, active: 0, completion: 0, blocked: 0
+      };
+      setStudents(users);
+      setStats(summary);
+    } catch (error) {
+      console.error("Erreur API:", error);
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    console.log("API RESPONSE:", response.data); // IMPORTANT DEBUG
-
-    const users = response.data?.users || response.data?.data?.users || [];
-    const summary = response.data?.summary || response.data?.data?.summary || {
-      total: 0,
-      active: 0,
-      completion: 0,
-      blocked: 0
-    };
-
-    setStudents(users);
-    setStats(summary);
-
-  } catch (error) {
-    console.error("Erreur API:", error);
-    setStudents([]); // avoid crash
-  } finally {
-    setLoading(false);
-  }
-};
   const toggleUserStatus = async (userId, currentStatus) => {
     try {
       const newStatus = currentStatus === 'Actif' ? 'Bloqué' : 'Actif';
-
-      await API.patch(`/admin/users/${userId}/status`, {
-        status: newStatus
-      });
-
+      await API.patch(`/admin/users/${userId}/status`, { status: newStatus });
       setStudents(prev =>
-        prev.map(s =>
-          s.id === userId ? { ...s, status: newStatus } : s
-        )
+        prev.map(s => s.id === userId ? { ...s, status: newStatus } : s)
       );
-
     } catch (error) {
       alert("Erreur lors du changement de statut");
     }
@@ -76,59 +58,58 @@ const UsersManager = () => {
   );
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
+    <div className="flex min-h-screen bg-[#f0f4ff] font-sans">
       <Sidebar />
 
-      <main className="flex-1 ml-72 p-10">
+      <main className="flex-1 ml-60 p-10">
 
-        {/* HEADER */}
+        {/* Header */}
         <div className="flex justify-between items-start mb-10">
           <div>
-            <h1 className="text-4xl font-[1000] text-[#002366] mb-2 tracking-tighter">
-              Utilisateurs
-            </h1>
-            <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-              Contrôle des accès & monitoring
-            </p>
+            <div className="text-[10px] font-medium text-[#e5522d] uppercase tracking-widest mb-2">
+              Administration
+            </div>
+            <h1 className="text-3xl font-medium text-[#0d1b3e] tracking-tight">Utilisateurs</h1>
+            <p className="text-slate-400 text-sm mt-1">Contrôle des accès & monitoring</p>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={15} />
               <input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Rechercher..."
-                className="pl-12 pr-6 py-3 bg-white border border-slate-100 rounded-2xl text-sm font-bold outline-none w-64"
+                className="pl-11 pr-5 py-2.5 bg-white border border-slate-100 rounded-xl text-sm w-60 focus:outline-none focus:ring-2 focus:ring-[#1754be]/10 focus:border-[#1754be]/30 transition-all placeholder:text-slate-300"
               />
             </div>
-
-            
-  <button onClick={()=>navigete('/add/user')} className="bg-[#F48120] text-white px-8 py-3.5 rounded-2xl font-[1000] text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl shadow-orange-200">
-    <UserPlus size={16} />
-    Nouveau
-  </button>
+            <button
+              onClick={() => navigate('/add/user')}
+              className="bg-[#e5522d] text-white px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 hover:bg-[#cc4522] transition-colors"
+            >
+              <UserPlus size={16} /> Nouveau
+            </button>
           </div>
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-4 gap-6 mb-10">
-          <StatCard icon={<TrendingUp size={18}/>} label="Total" value={stats.total} />
-          <StatCard icon={<Zap size={18}/>} label="Actifs" value={stats.active} />
-          <StatCard icon={<GraduationCap size={18}/>} label="Score" value={`${stats.completion}%`} />
-          <StatCard icon={<Ban size={18}/>} label="Bloqués" value={stats.blocked} />
+        {/* Stats */}
+        <div className="grid grid-cols-4 gap-5 mb-8">
+          <StatCard icon={<Users size={18} />}          label="Total"    value={stats.total}            color="text-[#1754be]" bg="bg-[#eef3fc]" />
+          <StatCard icon={<Zap size={18} />}            label="Actifs"   value={stats.active}           color="text-emerald-600" bg="bg-emerald-50" />
+          <StatCard icon={<GraduationCap size={18} />}  label="Score"    value={`${stats.completion}%`} color="text-purple-600" bg="bg-purple-50" />
+          <StatCard icon={<Ban size={18} />}            label="Bloqués"  value={stats.blocked}          color="text-[#e5522d]" bg="bg-[#fff3f0]" />
         </div>
 
-        {/* TABLE */}
-        <div className="bg-white rounded-[30px] border border-slate-100 overflow-hidden">
+        {/* Table */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
 
           <table className="w-full">
             <thead>
-              <tr className="text-[10px] uppercase text-slate-300 border-b">
-                <th className="p-6 text-left">Utilisateur</th>
-                <th className="p-6 text-left">Progression</th>
-                <th className="p-6 text-left">Statut</th>
-                <th className="p-6 text-right">Actions</th>
+              <tr className="bg-[#f8faff] border-b border-slate-100">
+                <th className="px-7 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest">Utilisateur</th>
+                <th className="px-7 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest">Progression</th>
+                <th className="px-7 py-4 text-left text-[10px] font-medium text-slate-400 uppercase tracking-widest">Statut</th>
+                <th className="px-7 py-4 text-right text-[10px] font-medium text-slate-400 uppercase tracking-widest">Actions</th>
               </tr>
             </thead>
 
@@ -136,96 +117,115 @@ const UsersManager = () => {
               {loading ? (
                 <tr>
                   <td colSpan="4" className="py-20 text-center">
-                    <Loader2 className="animate-spin text-orange-500 mx-auto" />
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="animate-spin text-[#e5522d]" size={30} />
+                      <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">Chargement...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredStudents.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 bg-[#f0f4ff] rounded-2xl flex items-center justify-center">
+                        <Users size={22} className="text-slate-300" />
+                      </div>
+                      <p className="text-slate-400 text-sm font-medium">Aucun utilisateur trouvé.</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
                 <AnimatePresence>
-                  {filteredStudents.map((student) => (
+                  {filteredStudents.map((student, i) => (
                     <motion.tr
                       key={student.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="border-b hover:bg-slate-50"
+                      transition={{ delay: i * 0.04 }}
+                      className="border-b border-slate-50 hover:bg-[#f8faff] transition-colors group"
                     >
-
-                      {/* USER */}
-                      <td className="p-6">
+                      {/* User */}
+                      <td className="px-7 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center font-black text-slate-500">
-                            {(student?.name || "?").charAt(0)}
+                          <div className="w-9 h-9 bg-[#eef3fc] rounded-xl flex items-center justify-center font-medium text-[#1754be] text-sm shrink-0">
+                            {(student?.name || "?").charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="font-black text-[#002366]">
+                            <p className="text-sm font-medium text-[#0d1b3e] group-hover:text-[#1754be] transition-colors">
                               {student?.name || "Unknown"}
                             </p>
-                            <p className="text-xs text-slate-400">
+                            <p className="text-[11px] text-slate-400 mt-0.5">
                               {student?.access_code || "---"}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      {/* PROGRESS */}
-                      <td className="p-6">
+                      {/* Progress */}
+                      <td className="px-7 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-32 h-2 bg-slate-100 rounded-full">
+                          <div className="w-28 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-orange-500 rounded-full"
+                              className="h-full bg-[#e5522d] rounded-full transition-all"
                               style={{ width: `${student?.progress || 0}%` }}
                             />
                           </div>
-                          <span className="text-xs font-black">
+                          <span className="text-xs font-medium text-slate-500">
                             {student?.progress || 0}%
                           </span>
                         </div>
                       </td>
 
-                      {/* STATUS */}
-                      <td className="p-6">
-                        <span className={`text-xs font-black px-3 py-1 rounded-full ${
+                      {/* Status */}
+                      <td className="px-7 py-4">
+                        <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1 rounded-full ${
                           student?.status === 'Actif'
                             ? 'bg-green-50 text-green-600'
-                            : 'bg-red-50 text-red-600'
+                            : 'bg-[#fff3f0] text-[#e5522d]'
                         }`}>
+                          {student?.status === 'Actif'
+                            ? <ShieldCheck size={11} />
+                            : <ShieldOff size={11} />
+                          }
                           {student?.status || 'Inconnu'}
                         </span>
                       </td>
 
-                      {/* ACTIONS */}
-                      <td className="p-6 text-right">
+                      {/* Actions */}
+                      <td className="px-7 py-4 text-right">
                         <button
-                          onClick={() =>
-                            toggleUserStatus(student.id, student.status)
-                          }
-                          className="text-slate-400 hover:text-orange-500"
+                          onClick={() => toggleUserStatus(student.id, student.status)}
+                          className="p-2 rounded-lg text-slate-300 hover:text-[#1754be] hover:bg-[#eef3fc] transition-all"
+                          title="Changer le statut"
                         >
-                          <MoreHorizontal size={18} />
+                          <MoreHorizontal size={17} />
                         </button>
                       </td>
-
                     </motion.tr>
                   ))}
                 </AnimatePresence>
               )}
             </tbody>
-
           </table>
         </div>
-
       </main>
     </div>
   );
 };
 
-/* ================= STATS CARD ================= */
-const StatCard = ({ icon, label, value }) => (
-  <div className="bg-white p-6 rounded-2xl border border-slate-100">
-    <div className="flex justify-between mb-3 text-orange-500">{icon}</div>
-    <p className="text-2xl font-black text-[#002366]">{value}</p>
-    <p className="text-[10px] uppercase text-slate-300 font-bold">{label}</p>
-  </div>
+/* StatCard */
+const StatCard = ({ icon, label, value, color, bg }) => (
+  <motion.div
+    whileHover={{ y: -3 }}
+    className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm"
+  >
+    <div className={`w-10 h-10 ${bg} ${color} rounded-xl flex items-center justify-center mb-4`}>
+      {icon}
+    </div>
+    <p className="text-2xl font-medium text-[#0d1b3e] tracking-tight">{value}</p>
+    <p className="text-[10px] uppercase text-slate-400 font-medium tracking-widest mt-1">{label}</p>
+  </motion.div>
 );
 
 export default UsersManager;

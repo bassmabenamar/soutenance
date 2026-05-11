@@ -8,6 +8,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import API from "../../services/api";
+import logoImg from "../../assets/codelink notebook.png";
 
 const LoginPage = () => {
   const [accessCode, setAccessCode] = useState("");
@@ -41,13 +42,11 @@ const LoginPage = () => {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      // redirect by role
       if (res.data.user.role === "admin") {
         navigate("/admin/dashboard");
       } else {
-        navigate("/student/dashboard");
+        navigate("/student/courses");
       }
-
     } catch (err) {
       setError(err.response?.data?.message || "Code invalide");
     } finally {
@@ -56,79 +55,101 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#f1f5f9] font-sans flex flex-col">
+    <div className="min-h-screen bg-[#f0f4ff] font-sans flex flex-col">
 
-      {/* HEADER */}
-      <header className="p-8">
-        <Link to="/">
-          <h1 className="text-[#F97316] text-xl font-black uppercase">
-            CodeLink Academy
-          </h1>
+      {/* Header */}
+      <header className="px-8 py-5 flex items-center">
+        <Link to="/" className="flex items-center gap-2 text-[#1754be] text-[17px] font-medium tracking-tight">
+          <img src={logoImg} alt="logo" className="w-7 h-7 object-contain" />
+          Codelink <span className="text-[#e5522d]">&nbsp;Notebook</span>
         </Link>
       </header>
 
-      {/* LOGIN BOX */}
+      {/* Login box */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-[480px] bg-white rounded-[24px] shadow-xl">
+        <div className="w-full max-w-[440px]">
 
-          {/* HEADER */}
-          <div className="bg-[#1e3a8a] p-10 text-center">
-            <GraduationCap className="text-white mx-auto mb-3" size={40} />
-            <h2 className="text-white text-2xl font-extrabold">
-              Connexion Étudiant
-            </h2>
-          </div>
+          {/* Card */}
+          <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
 
-          {/* FORM */}
-          <div className="p-10">
-            <form onSubmit={handleLogin} className="space-y-6">
+            {/* Top banner */}
+            <div className="bg-[#1754be] px-10 py-9 text-center">
+              <div className="w-14 h-14 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <GraduationCap className="text-white" size={28} />
+              </div>
+              <h2 className="text-white text-xl font-medium tracking-tight">
+                Connexion étudiant
+              </h2>
+              <p className="text-white/50 text-xs mt-1 tracking-wide">
+                Entrez votre code d'accès pour continuer
+              </p>
+            </div>
 
-              {/* INPUT */}
-              <div>
-                <label className="text-xs font-black text-slate-400 uppercase">
-                  Code d'accès
-                </label>
+            {/* Form */}
+            <div className="px-10 py-9">
+              <form onSubmit={handleLogin} className="space-y-5">
 
-                <div className="relative mt-2">
-                  <Key className="absolute left-3 top-3 text-slate-300" />
+                {/* Input */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400">
+                    Code d'accès
+                  </label>
+                  <div className="relative">
+                    <Key
+                      size={15}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
+                    />
+                    <input
+                      value={accessCode}
+                      onChange={(e) => setAccessCode(e.target.value)}
+                      disabled={isLoading}
+                      placeholder="CB-XXXX-XXXX"
+                      className="w-full pl-10 pr-4 py-3.5 bg-[#f8faff] border border-slate-100 rounded-xl text-sm font-medium text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#1754be]/15 focus:border-[#1754be]/40 focus:bg-white transition-all"
+                    />
+                  </div>
 
-                  <input
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    disabled={isLoading}
-                    placeholder="CB-XXXX-XXXX"
-                    className="w-full pl-10 py-3 bg-slate-50 border rounded-xl"
-                  />
+                  {error && (
+                    <p className="text-red-500 text-xs mt-1.5 flex items-center gap-1.5">
+                      <AlertCircle size={13} />
+                      {error}
+                    </p>
+                  )}
                 </div>
 
-                {error && (
-                  <p className="text-red-500 text-xs mt-2 flex items-center gap-1">
-                    <AlertCircle size={14} />
-                    {error}
-                  </p>
-                )}
-              </div>
+                {/* Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full bg-[#e5522d] text-white py-3.5 rounded-xl font-medium text-sm flex items-center justify-center gap-2 hover:bg-[#cc4522] transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Vérification...
+                    </>
+                  ) : (
+                    <>
+                      Accéder
+                      <ArrowRight size={16} />
+                    </>
+                  )}
+                </button>
+              </form>
 
-              {/* BUTTON */}
-              <button
-                disabled={isLoading}
-                className="w-full bg-[#f97316] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Vérification...
-                  </>
-                ) : (
-                  <>
-                    Accéder
-                    <ArrowRight />
-                  </>
-                )}
-              </button>
-            </form>
+              {/* Footer note */}
+              <p className="text-center text-[11px] text-slate-400 mt-6">
+                Pas encore de code ?{" "}
+                <Link
+                  to="/buy-notebook"
+                  className="text-[#1754be] font-medium hover:text-[#e5522d] transition-colors"
+                >
+                  Acheter un Notebook
+                </Link>
+              </p>
+            </div>
           </div>
 
+          
         </div>
       </div>
     </div>

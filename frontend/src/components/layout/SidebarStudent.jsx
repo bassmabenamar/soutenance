@@ -10,46 +10,26 @@ import {
   LogOut,
   FileCode,
 } from "lucide-react";
+import logoImg from "../../assets/codelink notebook.png";
+import API from "../../services/api";
 
-import API from "../../services/api"; // ✅ use your axios instance
-
-/* =========================
-   NAVIGATION CONFIG
-========================= */
+/* Navigation config */
 const NAVIGATION_LINKS = [
-  { to: "/student/dashboard", icon: LayoutDashboard, label: "Dashboard", role: "user" },
-  { to: "/student/courses", icon: BookOpen, label: "Courses", role: "user" },
-  { to: "/student/qcm", icon: HelpCircle, label: "Quizzes", role: "user" },
-
-  // ✅ ADD THIS
-  { to: "/student/tps", icon: FileCode, label: "TP", role: "user" },
-
-  { to: "/student/codelab", icon: Terminal, label: "CodeLab", role: "user" },
-  { to: "/student/certifications", icon: Award, label: "Certifications", role: "user" },
-  { to: "/student/profile", icon: Settings, label: "Profile", role: "user" },
+  //{ to: "/student/dashboard",      icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/student/courses",        icon: BookOpen,        label: "Courses" },
+  { to: "/student/qcm",            icon: HelpCircle,      label: "Quizzes" },
+  { to: "/student/tps",            icon: FileCode,        label: "TP" },
+  { to: "/student/codelab",        icon: Terminal,        label: "CodeLab" },
+  //{ to: "/student/profile",        icon: Settings,        label: "Profile" },
 ];
 
-/* =========================
-   SIDEBAR COMPONENT
-========================= */
-const Sidebar = ({ userRole = "user", brandName = "CodeLink" }) => {
+const Sidebar = ({ userRole = "user", brandName = "Codelink Notebook" }) => {
   const navigate = useNavigate();
 
-  const links = NAVIGATION_LINKS.filter(
-    (link) => link.role === "user" || link.role === userRole
-  );
-
-  /* =========================
-     LOGOUT FUNCTION
-  ========================= */
   const handleLogout = async () => {
     try {
-      await API.post("/logout"); // Laravel logout
-
-      // remove token
+      await API.post("/logout");
       localStorage.removeItem("token");
-
-      // redirect
       navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
@@ -57,23 +37,23 @@ const Sidebar = ({ userRole = "user", brandName = "CodeLink" }) => {
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-white border-r border-gray-100 flex flex-col py-8 px-4">
+    <aside className="w-60 min-h-screen bg-white border-r border-slate-100 flex flex-col py-7 px-4">
 
-      {/* =========================
-          BRAND
-      ========================= */}
-      <div className="px-4 mb-10">
-        <h1 className="text-[#F97316] text-2xl font-black">
-          {brandName}
-          <span className="text-slate-200">.</span>
-        </h1>
+      {/* Brand */}
+      <div className="px-3 mb-10">
+        <div className="flex items-center gap-2">
+          <img src={logoImg} alt="logo" className="w-7 h-7 object-contain" />
+          <div className="leading-tight">
+            <span className="text-[#1754be] text-[15px] font-medium tracking-tight">Codelink</span>
+            <span className="text-[#e5522d] text-[15px] font-medium tracking-tight"> Notebook</span>
+          </div>
+        </div>
+        <div className="mt-3 h-px bg-slate-100" />
       </div>
 
-      {/* =========================
-          NAVIGATION
-      ========================= */}
-      <nav className="flex-1 space-y-2">
-        {links.map((item) => (
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1">
+        {NAVIGATION_LINKS.map((item) => (
           <SidebarItem
             key={item.to}
             to={item.to}
@@ -83,65 +63,56 @@ const Sidebar = ({ userRole = "user", brandName = "CodeLink" }) => {
         ))}
       </nav>
 
-      {/* =========================
-          FOOTER + LOGOUT
-      ========================= */}
-      <div className="px-4 mt-auto pt-10 space-y-4">
-
-        {/* LOGOUT BUTTON */}
+      {/* Footer */}
+      <div className="px-3 mt-auto pt-8 space-y-3">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#F97316]-50 text-[#F97316]-500 font-bold hover:bg-orange-500 hover:text-white transition-all"
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 text-sm font-medium hover:bg-[#fff3f0] hover:text-[#e5522d] transition-all"
         >
-          <LogOut size={18} />
+          <LogOut size={17} />
           Déconnexion
         </button>
 
-        {/* VERSION */}
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
-          CodeLink v1.0
+        <p className="text-[10px] font-medium text-slate-300 uppercase tracking-widest px-1">
+          Codelink Notebook v1.0
         </p>
       </div>
     </aside>
   );
 };
 
-/* =========================
-   SIDEBAR ITEM
-========================= */
-const SidebarItem = ({ to, icon: Icon, label }) => {
-  return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        `relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 ${
-          isActive
-            ? "bg-orange-50 text-[#F97316] shadow-sm"
-            : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
-        }`
-      }
-    >
-      {({ isActive }) => (
-        <>
-          {/* ACTIVE BAR */}
-          {isActive && (
-            <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-1 h-8 bg-[#F97316] rounded-r-full shadow" />
-          )}
+/* Sidebar item */
+const SidebarItem = ({ to, icon: Icon, label }) => (
+  <NavLink
+    to={to}
+    className={({ isActive }) =>
+      `relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 ${
+        isActive
+          ? "bg-[#fff3f0] text-[#e5522d]"
+          : "text-slate-400 hover:bg-[#f0f4ff] hover:text-[#1754be]"
+      }`
+    }
+  >
+    {({ isActive }) => (
+      <>
+        {/* Active bar */}
+        {isActive && (
+          <div className="absolute left-[-16px] top-1/2 -translate-y-1/2 w-1 h-7 bg-[#e5522d] rounded-r-full" />
+        )}
 
-          {/* ICON */}
-          <Icon
-            size={20}
-            className={isActive ? "text-[#F97316]" : "text-slate-400"}
-          />
+        {/* Icon */}
+        <Icon
+          size={18}
+          className={isActive ? "text-[#e5522d]" : "text-slate-400"}
+        />
 
-          {/* LABEL */}
-          <span className={`text-sm font-bold ${isActive ? "text-[#F97316]" : ""}`}>
-            {label}
-          </span>
-        </>
-      )}
-    </NavLink>
-  );
-};
+        {/* Label */}
+        <span className={`font-medium ${isActive ? "text-[#e5522d]" : ""}`}>
+          {label}
+        </span>
+      </>
+    )}
+  </NavLink>
+);
 
 export default Sidebar;

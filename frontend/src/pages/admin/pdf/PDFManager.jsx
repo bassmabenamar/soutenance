@@ -27,19 +27,12 @@ const PDFManager = () => {
     fetchPDFs();
   }, []);
 
-  /* =========================
-     FETCH PDFs
-  ========================= */
   const fetchPDFs = async () => {
     try {
       setLoading(true);
-
- const response = await API.get('/admin/courses');
-
-console.log(response.data);
-
-setPdfs(response.data.courses || []);
-
+      const response = await API.get('/admin/courses');
+      console.log(response.data);
+      setPdfs(response.data.courses || []);
     } catch (error) {
       console.error('Erreur fetch PDFs:', error);
     } finally {
@@ -47,77 +40,54 @@ setPdfs(response.data.courses || []);
     }
   };
 
-  /* =========================
-     DELETE PDF
-  ========================= */
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      'Voulez-vous vraiment supprimer ce document ?'
-    );
-
+    const confirmDelete = window.confirm('Voulez-vous vraiment supprimer ce document ?');
     if (!confirmDelete) return;
-
     try {
       await API.delete(`/admin/courses/${id}`);
-
       setPdfs((prev) => prev.filter((item) => item.id !== id));
-
     } catch (error) {
       console.error(error);
       alert('Erreur lors de la suppression.');
     }
   };
 
-  /* =========================
-     FILTERS
-  ========================= */
   const dynamicCategories = [
     'Tous',
-    ...new Set(
-      pdfs
-        .map((item) => item.category)
-        .filter(Boolean)
-    ),
+    ...new Set(pdfs.map((item) => item.category).filter(Boolean)),
   ];
 
   const filteredData = pdfs.filter((item) => {
-    const matchesSearch = item.title
-      ?.toLowerCase()
-      .includes(searchTerm.toLowerCase());
-
-    const matchesFilter =
-      filter === 'Tous' || item.category === filter;
-
+    const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filter === 'Tous' || item.category === filter;
     return matchesSearch && matchesFilter;
   });
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC] font-sans text-slate-800">
+    <div className="flex min-h-screen bg-[#f0f4ff] font-sans text-slate-800">
       <SidebarAdmin />
 
-      <main className="flex-1 ml-72 p-10">
+      <main className="flex-1 ml-60 p-10">
 
-        {/* ================= HEADER ================= */}
+        {/* Header */}
         <header className="flex justify-between items-center mb-10">
-          <div className="flex items-center gap-4">
-            <Menu className="text-slate-400" size={20} />
-
-            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-tight">
+          <div className="flex items-center gap-3">
+            <Menu className="text-slate-300" size={18} />
+            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-widest">
               Espace Administration
-            </h2>
+            </span>
           </div>
         </header>
 
-        {/* ================= TOP ================= */}
-        <div className="flex justify-between items-end mb-10">
+        {/* Top */}
+        <div className="flex justify-between items-end mb-8">
           <div>
-            <h1 className="text-4xl font-black text-[#002366] mb-2 tracking-tight">
+            <h1 className="text-3xl font-medium text-[#0d1b3e] mb-2 tracking-tight">
               Gestionnaire PDF
             </h1>
-
-            <p className="text-slate-400 font-medium">
+            <p className="text-slate-400 text-sm">
               Gestion en direct de la table{' '}
-              <code className="bg-slate-100 px-1 rounded text-orange-600">
+              <code className="bg-white border border-slate-100 px-2 py-0.5 rounded-md text-[#e5522d] text-xs">
                 courses
               </code>
             </p>
@@ -125,57 +95,52 @@ setPdfs(response.data.courses || []);
 
           <button
             onClick={() => navigate('/admin/pdf/add')}
-            className="bg-[#F48120] text-white px-8 py-4 rounded-2xl font-black text-sm flex items-center gap-3 shadow-lg hover:bg-orange-600 transition-all"
+            className="bg-[#e5522d] text-white px-6 py-3 rounded-xl font-medium text-sm flex items-center gap-2 hover:bg-[#cc4522] transition-all"
           >
-            <Plus size={20} />
+            <Plus size={17} />
             Nouveau PDF
           </button>
         </div>
 
-        {/* ================= STATS + FILTER ================= */}
-        <div className="grid grid-cols-12 gap-6 mb-8">
+        {/* Stats + Filter */}
+        <div className="grid grid-cols-12 gap-5 mb-7">
 
-          {/* COUNT */}
-          <div className="col-span-3 bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
-            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-4">
+          {/* Count */}
+          <div className="col-span-3 bg-white p-7 rounded-2xl border border-slate-100 shadow-sm">
+            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mb-4">
               Documents en ligne
             </p>
-
-            <h3 className="text-5xl font-black text-[#002366]">
+            <h3 className="text-5xl font-medium text-[#0d1b3e] tracking-tight">
               {pdfs.length}
             </h3>
           </div>
 
-          {/* SEARCH */}
-          <div className="col-span-9 bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm">
-
-            <div className="relative mb-6">
+          {/* Search + filters */}
+          <div className="col-span-9 bg-white p-7 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="relative mb-5">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300"
-                size={20}
+                size={16}
               />
-
               <input
                 type="text"
                 placeholder="Rechercher par titre..."
-                className="w-full bg-slate-50 border-none rounded-2xl py-4 pl-12 text-sm focus:ring-2 focus:ring-orange-200 outline-none"
+                className="w-full bg-[#f8faff] border border-slate-100 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#1754be]/10 focus:border-[#1754be]/30 transition-all"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
 
-            {/* FILTER BUTTONS */}
-            <div className="flex items-center gap-3 overflow-x-auto pb-2">
-              <Filter size={14} className="text-slate-300 mr-2" />
-
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              <Filter size={13} className="text-slate-300 shrink-0" />
               {dynamicCategories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setFilter(cat)}
-                  className={`px-4 py-2 rounded-xl text-[11px] font-black whitespace-nowrap transition-all ${
+                  className={`px-4 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition-all ${
                     filter === cat
-                      ? 'bg-[#002366] text-white shadow-md'
-                      : 'bg-slate-100 text-slate-400 hover:bg-slate-200'
+                      ? 'bg-[#1754be] text-white shadow-sm'
+                      : 'bg-[#f0f4ff] text-slate-400 hover:bg-[#dce9fb] hover:text-[#1754be]'
                   }`}
                 >
                   {cat?.toUpperCase()}
@@ -185,60 +150,38 @@ setPdfs(response.data.courses || []);
           </div>
         </div>
 
-        {/* ================= TABLE ================= */}
-        <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
-
+        {/* Table */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           {loading ? (
-            <div className="py-32 flex flex-col items-center">
-              <Loader2
-                className="animate-spin text-orange-500 mb-4"
-                size={40}
-              />
-
-              <p className="text-slate-400 font-bold">
-                Synchronisation...
-              </p>
+            <div className="py-28 flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-[#e5522d]" size={36} />
+              <p className="text-slate-400 text-sm font-medium">Synchronisation...</p>
             </div>
           ) : filteredData.length === 0 ? (
-
-            /* EMPTY STATE */
-            <div className="py-32 flex flex-col items-center">
-              <FileText size={60} className="text-slate-200 mb-4" />
-
-              <h3 className="text-xl font-bold text-slate-500 mb-2">
-                Aucun PDF trouvé
-              </h3>
-
-              <p className="text-slate-400">
-                Ajoutez votre premier document PDF.
-              </p>
+            <div className="py-28 flex flex-col items-center gap-3">
+              <FileText size={48} className="text-slate-200" />
+              <h3 className="text-lg font-medium text-slate-500">Aucun PDF trouvé</h3>
+              <p className="text-slate-400 text-sm">Ajoutez votre premier document PDF.</p>
             </div>
-
           ) : (
             <table className="w-full text-left">
-
-              {/* TABLE HEAD */}
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                <tr className="bg-[#f8faff] border-b border-slate-100">
+                  <th className="px-6 py-4 text-[10px] font-medium text-slate-400 uppercase tracking-widest">
                     Titre du cours
                   </th>
-
-                  <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <th className="px-6 py-4 text-[10px] font-medium text-slate-400 uppercase tracking-widest">
                     Catégorie
                   </th>
-
-                  <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <th className="px-6 py-4 text-[10px] font-medium text-slate-400 uppercase tracking-widest">
                     Niveau
                   </th>
-
-                  <th className="p-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
+                  <th className="px-6 py-4 text-[10px] font-medium text-slate-400 uppercase tracking-widest text-right">
                     Actions
                   </th>
                 </tr>
               </thead>
 
-              {/* TABLE BODY */}
               <tbody className="divide-y divide-slate-50">
                 <AnimatePresence>
                   {filteredData.map((item) => (
@@ -248,71 +191,53 @@ setPdfs(response.data.courses || []);
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="group hover:bg-slate-50/50 transition-colors"
+                      className="group hover:bg-[#f8faff] transition-colors"
                     >
-                      {/* TITLE */}
-                      <td className="p-6">
-                        <div className="flex items-center gap-4">
-
-                          <div className="w-10 h-10 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center">
-                            <FileText size={18} />
+                      {/* Title */}
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-[#fff3f0] text-[#e5522d] rounded-xl flex items-center justify-center shrink-0">
+                            <FileText size={16} />
                           </div>
-
                           <div>
-                            <p className="text-sm font-bold text-[#002366]">
-                              {item.title}
-                            </p>
-
-                            <p className="text-[10px] text-slate-400 font-medium">
+                            <p className="text-sm font-medium text-[#0d1b3e]">{item.title}</p>
+                            <p className="text-[11px] text-slate-400 mt-0.5">
                               {item.description || 'Document PDF'}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      {/* CATEGORY */}
-                      <td className="p-6">
-                        <span
-                          className={`px-3 py-1 rounded-md text-[10px] font-black uppercase border ${getCatStyle(
-                            item.category
-                          )}`}
-                        >
+                      {/* Category */}
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-lg text-[10px] font-medium uppercase border ${getCatStyle(item.category)}`}>
                           {item.category || 'N/A'}
                         </span>
                       </td>
 
-                      {/* LEVEL */}
-                      <td className="p-6">
-                        <span className="text-[11px] font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                      {/* Level */}
+                      <td className="px-6 py-4">
+                        <span className="text-[11px] font-medium text-slate-500 bg-[#f0f4ff] border border-[#c7d5f5] px-3 py-1 rounded-full">
                           {item.level}
                         </span>
                       </td>
 
-                      {/* ACTIONS */}
-                      <td className="p-6 text-right">
+                      {/* Actions */}
+                      <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
-
-                          {/* VIEW PDF */}
                           <button
-                            onClick={() =>
-                              window.open(
-                                `http://localhost:8000/storage/${item.file_path}`,
-                                '_blank'
-                              )
-                            }
-                            className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                            onClick={() => window.open(`http://localhost:8000/storage/${item.file_path}`, '_blank')}
+                            className="p-2 rounded-lg text-slate-300 hover:text-[#1754be] hover:bg-[#eef3fc] transition-all"
                             title="Visualiser"
                           >
-                            <Eye size={18} />
+                            <Eye size={17} />
                           </button>
-
-                          {/* DELETE */}
                           <button
                             onClick={() => handleDelete(item.id)}
-                            className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                            className="p-2 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"
                             title="Supprimer"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={17} />
                           </button>
                         </div>
                       </td>
@@ -328,22 +253,12 @@ setPdfs(response.data.courses || []);
   );
 };
 
-/* =========================
-   CATEGORY COLORS
-========================= */
 const getCatStyle = (cat) => {
   const c = cat?.toUpperCase();
-
-  if (c === 'HTML')
-    return 'bg-orange-50 text-orange-600 border-orange-100';
-
-  if (c === 'CSS')
-    return 'bg-blue-50 text-blue-600 border-blue-100';
-
-  if (c === 'JS' || c === 'JAVASCRIPT')
-    return 'bg-yellow-50 text-yellow-600 border-yellow-100';
-
-  return 'bg-slate-50 text-slate-600 border-slate-100';
+  if (c === 'HTML')       return 'bg-[#fff3f0] text-[#e5522d] border-[#f5bfb0]';
+  if (c === 'CSS')        return 'bg-[#eef3fc] text-[#1754be] border-[#b8cef5]';
+  if (c === 'JS' || c === 'JAVASCRIPT') return 'bg-yellow-50 text-yellow-600 border-yellow-100';
+  return 'bg-slate-50 text-slate-500 border-slate-100';
 };
 
 export default PDFManager;
