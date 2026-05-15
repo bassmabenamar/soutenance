@@ -102,9 +102,6 @@ const LandingPage = () => {
           </p>
 
           <div className="flex flex-wrap gap-3">
-            <button className="bg-[#e5522d] text-white px-7 py-3 rounded-lg text-sm font-medium hover:bg-[#cc4522] transition-all hover:-translate-y-0.5">
-              Essai gratuit
-            </button>
             <Link
               to="/buy-notebook"
               className="flex items-center gap-2 text-[#1754be] px-6 py-3 rounded-lg text-sm font-medium border border-[#1754be] hover:bg-[#eef3fc] transition-colors"

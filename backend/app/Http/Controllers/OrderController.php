@@ -7,17 +7,22 @@ use App\Models\Order;
 
 class OrderController extends Controller
 {
-    public function index(Request $request)
-    {
-        return Order::where('user_id', $request->user()->id)->get();
-    }
-
     public function store(Request $request)
     {
         return Order::create([
-            'user_id' => $request->user()->id,
-            'product' => $request->product,
+
+            'first_name' => $request->firstName,
+            'last_name' => $request->lastName,
+
+            'address' => $request->address,
+            'city' => $request->city,
+
+            'zip_code' => $request->zipCode,
+
+            'phone' => $request->phone,
+
             'amount' => $request->amount,
+
             'status' => 'pending'
         ]);
     }

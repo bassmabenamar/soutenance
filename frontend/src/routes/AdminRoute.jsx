@@ -11,7 +11,7 @@ export default function AdminRoute() {
 
   // logged in but NOT admin
   if (user.role !== "admin") {
-    return <Navigate to="/student/dashboard" replace />;
+    return <Navigate to="/student/courses" replace />;
   }
 
   // admin allowed

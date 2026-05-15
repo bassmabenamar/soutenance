@@ -27,7 +27,7 @@ const CommandePage = () => {
       const response = await API.post('/student/orders', {
         ...formData,
         product: "Codelink Notebook Premium",
-        amount: 99
+        amount: 149
       });
       if (response) {
         alert("Commande confirmée !");
@@ -132,14 +132,15 @@ const CommandePage = () => {
                     <span className="block font-medium text-[15px]">Codelink Notebook</span>
                     <span className="block text-[11px] text-slate-400 mt-0.5 tracking-wide">Learning Ecosystem Access</span>
                   </div>
-                  <span className="font-medium text-[#e5522d] text-[16px]">99 DH</span>
+                  <span className="font-medium text-[#e5522d] text-[16px]">149 DH</span>
                 </div>
 
                 {/* Totaux */}
                 <div className="bg-white/5 rounded-xl p-5 border border-white/5 space-y-3">
                   <div className="flex justify-between items-center text-[12px]">
                     <span className="text-slate-400 tracking-wide">Sous-total</span>
-                    <span className="font-medium">99.00 DH</span>
+                    <span className="font-medium">149
+                      .00 DH</span>
                   </div>
                   <div className="flex justify-between items-center text-[12px]">
                     <span className="text-slate-400 tracking-wide">Livraison</span>
@@ -147,7 +148,7 @@ const CommandePage = () => {
                   </div>
                   <div className="border-t border-white/10 pt-3 flex justify-between items-center">
                     <span className="text-[11px] text-slate-400 uppercase tracking-widest">Total</span>
-                    <span className="text-2xl font-medium tracking-tight">99 <span className="text-sm">DH</span></span>
+                    <span className="text-2xl font-medium tracking-tight">149 <span className="text-sm">DH</span></span>
                   </div>
                 </div>
               </div>

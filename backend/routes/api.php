@@ -7,12 +7,13 @@ use App\Http\Controllers\{
     QcmController,
     CourseController,
     LanguageController,
-    ResultController,
+    
     StudentController,
     CertificationController,
     UserController,
     TPController
 };
+use App\Http\Controllers\OrderController;
 
 /* ================= AUTH ================= */
 Route::post('/login', [AuthController::class, 'login']);
@@ -22,12 +23,15 @@ Route::get('/languages', [LanguageController::class, 'index']);
 Route::get('/courses/category/{languageId}', [CourseController::class, 'byLanguage']);
 Route::get('/courses/{id}', [CourseController::class, 'show']);
 
+Route::post('/student/orders', [OrderController::class, 'store']);
+
 /* ================= PROTECTED ================= */
 Route::middleware('auth:sanctum')->group(function () {
 
     /* AUTH */
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    
 
     /* STUDENT */
     Route::prefix('student')->group(function () {
@@ -39,11 +43,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/qcm/{languageId}', [QcmController::class, 'getByLanguage']);
         Route::post('/qcm/submit', [QcmController::class, 'submit']);
 
-        // results
-        Route::get('/results', [ResultController::class, 'index']);
-
+      
         // certifications
         Route::get('/certifications', [CertificationController::class, 'index']);
+
+
+        
     });
 
     /* ADMIN */
